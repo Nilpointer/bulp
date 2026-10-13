@@ -15,12 +15,18 @@ mise run build         # bin/elg, bin/elg-menubar (cgo: Xcode CLT on macOS, gtk4
 mise run build-linux   # static Linux binaries in bin/linux-{amd64,arm64}/ (no cgo: panel opens in a browser)
 mise run test
 mise run flatpak       # build + install the Flatpak locally, then: flatpak run de.codecauldron.Elg
+mise run appimage      # build/Elgato_Lights-<version>-x86_64.AppImage (needs podman or docker)
 ```
 
 The Flatpak (`packaging/flatpak/de.codecauldron.Elg.yml`) uses the GNOME 51 runtime, which ships GTK 4 and
 WebKitGTK; one-time setup: `flatpak install flathub org.flatpak.Builder`. The CLI is included too:
 `flatpak run --command=elg de.codecauldron.Elg list`. Desktop entry, AppStream metadata and icon live in
 `packaging/`.
+
+The AppImage doesn't bundle GTK or WebKit (~17 MB). It carries two builds of `elg-menubar`: one linked
+against the system's GTK 4 + WebKitGTK 6.0 (built in an Ubuntu 24.04 container so it runs on glibc ≥ 2.34),
+used when those libraries are installed (Ubuntu 24.04+, Debian 12+, current Fedora/Arch), and a static
+one that opens the panel in a browser everywhere else. `AppRun` picks between them.
 
 ## CLI
 

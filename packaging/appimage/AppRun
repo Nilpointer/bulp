@@ -1,0 +1,9 @@
+#!/bin/sh
+# Prefer the build linked against the system's GTK 4 and WebKitGTK 6.0 (native
+# panel window). If those libraries are missing the dynamic loader refuses to
+# start it, and the static build, which opens the panel in a browser, runs instead.
+here=$(dirname "$(readlink -f "$0")")
+if "$here/usr/bin/elg-menubar" -h >/dev/null 2>&1; then
+	exec "$here/usr/bin/elg-menubar" "$@"
+fi
+exec "$here/usr/bin/elg-menubar-static" "$@"

@@ -28,5 +28,14 @@ run = "./bin/elg-menubar"
 description = "Build and install the Flatpak locally (flatpak run de.codecauldron.Elg)"
 run = [
   "go mod vendor", # the build has no network; removed again so local builds don't use it
-  "flatpak run org.flatpak.Builder --user --install --force-clean --install-deps-from=flathub build packaging/flatpak/de.codecauldron.Elg.yml; s=$?; rm -rf vendor; exit $s",
+  "flatpak run org.flatpak.Builder --user --install --force-clean --install-deps-from=flathub --repo=build/flatpak-repo build packaging/flatpak/de.codecauldron.Elg.yml; s=$?; rm -rf vendor; exit $s",
 ]
+
+[tasks.appimage]
+description = "Build build/Elgato_Lights-<version>-x86_64.AppImage (needs podman or docker)"
+run = "packaging/appimage/build.sh"
+
+[tasks.flatpak-bundle]
+description = "Single-file build/de.codecauldron.Elg.flatpak for releases (pulls the runtime from Flathub on install)"
+depends = ["flatpak"]
+run = "flatpak build-bundle --runtime-repo=https://dl.flathub.org/repo/flathub.flatpakrepo build/flatpak-repo build/de.codecauldron.Elg.flatpak de.codecauldron.Elg"

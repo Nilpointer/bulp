@@ -1,0 +1,8 @@
+# Build environment for the AppImage's GTK binary: linking against an older
+# glibc/GTK/WebKitGTK than the build host keeps it running on older distros.
+# Go itself is mounted in from the host (see build.sh).
+FROM docker.io/library/ubuntu:24.04
+RUN apt-get update \
+ && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+      gcc libc6-dev pkg-config libgtk-4-dev libwebkitgtk-6.0-dev \
+ && rm -rf /var/lib/apt/lists/*
