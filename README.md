@@ -299,6 +299,10 @@ mise run release       # all of the above release files + CLI binaries + SHA256S
 The Flatpak (`packaging/flatpak/io.github.Nilpointer.Bulp.yml`) uses the GNOME 51 runtime, which ships GTK 4 and
 WebKitGTK; one-time setup: `flatpak install flathub org.flatpak.Builder`.
 
+`packaging/flatpak/flathub/` holds the manifest for Flathub: it builds a release tag from git, offline,
+with every Go module as a checksummed download listed in `go-modules.yml`. After tagging a release,
+update `tag` and `commit` there, and run `packaging/flatpak/gen-go-sources.py` if `go.mod` changed.
+
 The AppImage doesn't bundle GTK or WebKit (~17 MB). It carries two builds of `bulp-menubar`: one linked
 against the system's GTK 4 + WebKitGTK 6.0 (built in an Ubuntu 24.04 container so it runs on glibc ≥ 2.34)
 and a static one that opens the panel in a browser; `AppRun` starts the first if its libraries load.

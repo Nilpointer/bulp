@@ -1,0 +1,43 @@
+# Flathub manifest: builds the tagged release from git, offline.
+# After tagging a release: update tag + commit below, and rerun
+# packaging/flatpak/gen-go-sources.py if go.mod changed.
+id: io.github.Nilpointer.Bulp
+runtime: org.gnome.Platform
+runtime-version: '51' # ships GTK 4 and WebKitGTK 6.0
+sdk: org.gnome.Sdk
+sdk-extensions:
+  - org.freedesktop.Sdk.Extension.golang
+command: bulp-menubar
+finish-args:
+  - --share=network # the lights' HTTP API and Bonjour discovery
+  - --system-talk-name=org.freedesktop.Avahi # discovery via the system's mDNS daemon
+  - --share=ipc
+  - --socket=wayland
+  - --socket=fallback-x11
+  - --device=dri
+  # Tray icon; the item registers by its unique bus name, so no --own-name.
+  - --talk-name=org.kde.StatusNotifierWatcher
+build-options:
+  append-path: /usr/lib/sdk/golang/bin
+  env:
+    GOFLAGS: -mod=vendor -trimpath
+    GOTOOLCHAIN: local
+    GOPROXY: 'off'
+modules:
+  - name: bulp
+    buildsystem: simple
+    build-commands:
+      - go build -o /app/bin/bulp-menubar ./cmd/bulp-menubar
+      - go build -o /app/bin/bulp ./cmd/bulp # flatpak run --command=bulp io.github.Nilpointer.Bulp
+      - install -Dm644 packaging/io.github.Nilpointer.Bulp.desktop -t /app/share/applications
+      - install -Dm644 packaging/io.github.Nilpointer.Bulp.metainfo.xml -t /app/share/metainfo
+      - install -Dm644 packaging/io.github.Nilpointer.Bulp.svg -t /app/share/icons/hicolor/scalable/apps
+    sources:
+      - type: git
+        url: https://github.com/Nilpointer/bulp.git
+        tag: v1.2.0
+        commit: 9e8b8bb0e2b05aa151113396b2c9e1652f026030
+        x-checker-data:
+          type: git
+          tag-pattern: ^v([\d.]+)$
+      - go-modules.yml
