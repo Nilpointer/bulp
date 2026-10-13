@@ -25,7 +25,7 @@ Downloads are on the [releases page](https://github.com/Nilpointer/bulps/release
 |---|---|
 | **Flatpak** `de.codecauldron.Bulp.flatpak` | `flatpak install --user de.codecauldron.Bulp.flatpak`, then start Bulp from your app launcher. Pulls the GNOME runtime from Flathub. Includes the CLI: `flatpak run --command=bulp de.codecauldron.Bulp`. |
 | **AppImage** `Bulp-<version>-x86_64.AppImage` | `chmod +x` and run. Shows the panel in a native window if GTK 4 + WebKitGTK 6.0 are installed (Ubuntu 24.04+, Debian 12+, current Fedora/Arch), otherwise in your browser. |
-| **CLI** `bulp-<os>-<arch>` | Single static binary for Linux and macOS (amd64/arm64). |
+| **CLI** `bulp-<os>-<arch>` | Single static binary for Linux and macOS (amd64/arm64); on macOS see [below](#cli-on-macos). |
 
 ### Tray icon on GNOME
 
@@ -40,6 +40,30 @@ gnome-extensions enable appindicatorsupport@rgcjonas.gmail.com
 ```
 
 Without a tray, Bulp runs as just the control panel window and quits when you close it.
+
+### CLI on macOS
+
+The tray app is Linux-only (use Elgato's Control Center app on macOS), but the `bulp` CLI runs on macOS,
+for scripts and AI agents. Install it to `/usr/local/bin`, which is on the default `PATH`, so shells and
+agents find it:
+
+```sh
+# Apple Silicon; on an Intel Mac use bulp-darwin-amd64
+curl -fLo /tmp/bulp https://github.com/Nilpointer/bulps/releases/latest/download/bulp-darwin-arm64
+sudo install -d /usr/local/bin                    # newer Macs may not have the folder yet
+sudo install -m 755 /tmp/bulp /usr/local/bin/bulp
+bulp list
+```
+
+- **Download with `curl`, not a browser.** Browsers mark the file as quarantined and macOS refuses to run
+  the unsigned binary. If you did use a browser: `xattr -d com.apple.quarantine /usr/local/bin/bulp`.
+- **Allow Local Network access** (macOS 15+) when macOS asks on the first `bulp list`. The prompt is for
+  the app running `bulp` (Terminal, iTerm, an IDE or an agent's desktop app), and each needs it once.
+- **Set `BULP_HOST`.** macOS has no Avahi, so discovery falls back to plain multicast, which often misses
+  lights on Wi-Fi. Fixed addresses make every command reliable, and agents started from your shell
+  inherit them: `echo 'export BULP_HOST=192.168.1.20' >> ~/.zshrc` (comma-separate several lights).
+
+To let an agent use it, see [Scripts and AI agents](#scripts-and-ai-agents).
 
 ## Using Bulp
 
@@ -93,6 +117,8 @@ unreachable lights), so it works from any directory. Install it for Claude Code 
 
 ```sh
 mkdir -p ~/.claude/skills && cp -r skills/bulp ~/.claude/skills/
+# or without a clone of this repo:
+mkdir -p ~/.claude/skills/bulp && curl -fLo ~/.claude/skills/bulp/SKILL.md https://raw.githubusercontent.com/Nilpointer/bulps/main/skills/bulp/SKILL.md
 ```
 
 then just ask "dim the lights to 40%". Other agents that support the Agent Skills `SKILL.md` format load
