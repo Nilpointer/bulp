@@ -14,7 +14,13 @@ Go is pinned with [mise](https://mise.jdx.dev):
 mise run build         # bin/elg, bin/elg-menubar (cgo: Xcode CLT on macOS, gtk4 + webkitgtk-6.0 dev packages on Linux)
 mise run build-linux   # static Linux binaries in bin/linux-{amd64,arm64}/ (no cgo: panel opens in a browser)
 mise run test
+mise run flatpak       # build + install the Flatpak locally, then: flatpak run de.codecauldron.Elg
 ```
+
+The Flatpak (`packaging/flatpak/de.codecauldron.Elg.yml`) uses the GNOME 51 runtime, which ships GTK 4 and
+WebKitGTK; one-time setup: `flatpak install flathub org.flatpak.Builder`. The CLI is included too:
+`flatpak run --command=elg de.codecauldron.Elg list`. Desktop entry, AppStream metadata and icon live in
+`packaging/`.
 
 ## CLI
 
@@ -53,4 +59,5 @@ sudo dnf install gnome-shell-extension-appindicator   # same package name on Arc
 gnome-extensions enable appindicatorsupport@rgcjonas.gmail.com
 ```
 
-`-host a,b` skips Bonjour discovery if multicast is blocked.
+`-host a,b` skips Bonjour discovery if multicast is blocked. On Linux, discovery goes through the Avahi
+daemon when it's running (much more reliable than querying directly), else plain multicast.

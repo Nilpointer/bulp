@@ -1,2 +1,5 @@
 bin/
 .idea/
+vendor/
+.flatpak-builder/
+build/

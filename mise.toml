@@ -23,3 +23,10 @@ run = "go test ./..."
 description = "Build and run the menu-bar app"
 depends = ["build"]
 run = "./bin/elg-menubar"
+
+[tasks.flatpak]
+description = "Build and install the Flatpak locally (flatpak run de.codecauldron.Elg)"
+run = [
+  "go mod vendor", # the build has no network; removed again so local builds don't use it
+  "flatpak run org.flatpak.Builder --user --install --force-clean --install-deps-from=flathub build packaging/flatpak/de.codecauldron.Elg.yml; s=$?; rm -rf vendor; exit $s",
+]

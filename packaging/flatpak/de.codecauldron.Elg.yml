@@ -1,0 +1,35 @@
+# Local build: mise run flatpak (vendors Go modules first; the build has no network).
+id: de.codecauldron.Elg
+runtime: org.gnome.Platform
+runtime-version: '51' # ships GTK 4 and WebKitGTK 6.0
+sdk: org.gnome.Sdk
+sdk-extensions:
+  - org.freedesktop.Sdk.Extension.golang
+command: elg-menubar
+finish-args:
+  - --share=network # the lights' HTTP API and Bonjour discovery
+  - --system-talk-name=org.freedesktop.Avahi # discovery via the system's mDNS daemon
+  - --share=ipc
+  - --socket=wayland
+  - --socket=fallback-x11
+  - --device=dri
+  # Tray icon; the item registers by its unique bus name, so no --own-name.
+  - --talk-name=org.kde.StatusNotifierWatcher
+build-options:
+  append-path: /usr/lib/sdk/golang/bin
+  env:
+    GOFLAGS: -mod=vendor -trimpath
+    GOTOOLCHAIN: local
+modules:
+  - name: elg
+    buildsystem: simple
+    build-commands:
+      - go build -o /app/bin/elg-menubar ./cmd/elg-menubar
+      - go build -o /app/bin/elg ./cmd/elg # flatpak run --command=elg de.codecauldron.Elg
+      - install -Dm644 packaging/de.codecauldron.Elg.desktop -t /app/share/applications
+      - install -Dm644 packaging/de.codecauldron.Elg.metainfo.xml -t /app/share/metainfo
+      - install -Dm644 packaging/de.codecauldron.Elg.svg -t /app/share/icons/hicolor/scalable/apps
+    sources:
+      - type: dir
+        path: ../..
+        skip: [bin, .flatpak-builder, build]

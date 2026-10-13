@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>de.codecauldron.Elg</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>MIT</project_license>
+
+  <name>Elgato Lights</name>
+  <summary>Control your Elgato lights from the desktop</summary>
+  <developer id="de.codecauldron">
+    <name>Andreas Ulrich</name>
+  </developer>
+
+  <description>
+    <p>
+      Turn Elgato Key Lights, Ring Lights and Light Strips on and off and adjust
+      their brightness and color temperature, right from your desktop. Lights on
+      the local network are found automatically.
+    </p>
+    <ul>
+      <li>Tray icon with a quick on/off menu (where the desktop has a tray)</li>
+      <li>Control panel with brightness, color temperature and color</li>
+      <li>Talks to the lights directly over your network; no account or cloud</li>
+    </ul>
+    <p>This is an unofficial app, not affiliated with or endorsed by Elgato or Corsair.</p>
+  </description>
+
+  <launchable type="desktop-id">de.codecauldron.Elg.desktop</launchable>
+  <url type="homepage">https://github.com/Nilpointer/bulps</url>
+  <url type="bugtracker">https://github.com/Nilpointer/bulps/issues</url>
+  <url type="vcs-browser">https://github.com/Nilpointer/bulps</url>
+
+  <content_rating type="oars-1.1"/>
+  <supports>
+    <control>pointing</control>
+    <control>keyboard</control>
+    <control>touch</control>
+  </supports>
+  <requires>
+    <display_length compare="ge">360</display_length>
+  </requires>
+  <branding>
+    <color type="primary" scheme_preference="light">#ffe9a8</color>
+    <color type="primary" scheme_preference="dark">#5c4400</color>
+  </branding>
+
+  <releases>
+    <release version="0.1.0" date="2026-10-13">
+      <description>
+        <p>First release.</p>
+      </description>
+    </release>
+  </releases>
+</component>

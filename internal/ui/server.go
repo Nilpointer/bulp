@@ -135,10 +135,15 @@ func (s *Server) discoverLoop(ctx context.Context) {
 			close(s.scanned)
 			first = false
 		}
+		// mDNS replies get lost now and then; until a light shows up, retry soon.
+		wait := 60 * time.Second
+		if len(s.snapshot()) == 0 {
+			wait = 5 * time.Second
+		}
 		select {
 		case <-ctx.Done():
 			return
-		case <-time.After(60 * time.Second):
+		case <-time.After(wait):
 		}
 	}
 }

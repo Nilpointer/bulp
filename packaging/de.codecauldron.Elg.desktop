@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Name=Elgato Lights
+GenericName=Light Control
+Comment=Control Elgato Key Lights, Ring Lights and Light Strips on your network
+Exec=elg-menubar
+Icon=de.codecauldron.Elg
+Terminal=false
+Categories=Utility;
+Keywords=Elgato;Key Light;Ring Light;Light Strip;brightness;color temperature;
+StartupNotify=true
+SingleMainWindow=true
