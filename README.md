@@ -25,7 +25,7 @@ Downloads are on the [releases page](https://github.com/Nilpointer/bulps/release
 |---|---|
 | **Flatpak** `de.codecauldron.Bulp.flatpak` | `flatpak install --user de.codecauldron.Bulp.flatpak`, then start Bulp from your app launcher. Pulls the GNOME runtime from Flathub. Includes the CLI: `flatpak run --command=bulp de.codecauldron.Bulp`. |
 | **AppImage** `Bulp-<version>-x86_64.AppImage` | `chmod +x` and run. Shows the panel in a native window if GTK 4 + WebKitGTK 6.0 are installed (Ubuntu 24.04+, Debian 12+, current Fedora/Arch), otherwise in your browser. |
-| **CLI** `bulp-<os>-<arch>` | Single static binary for Linux and macOS (amd64/arm64); on macOS see [below](#cli-on-macos). |
+| **CLI** `bulp-<os>-<arch>` | Single static binary for Linux, macOS and Windows (amd64/arm64); see [macOS](#cli-on-macos) and [Windows](#cli-on-windows) below. |
 
 ### Tray icon on GNOME
 
@@ -62,6 +62,33 @@ bulp list
 - **Set `BULP_HOST`.** macOS has no Avahi, so discovery falls back to plain multicast, which often misses
   lights on Wi-Fi. Fixed addresses make every command reliable, and agents started from your shell
   inherit them: `echo 'export BULP_HOST=192.168.1.20' >> ~/.zshrc` (comma-separate several lights).
+
+To let an agent use it, see [Scripts and AI agents](#scripts-and-ai-agents).
+
+### CLI on Windows
+
+As on macOS, only the CLI runs on Windows (the tray app is Linux-only; use Elgato's Control Center app).
+In PowerShell, install it into your user's programs folder and add that to your `PATH`:
+
+```powershell
+# x64 PCs; on Windows on Arm use bulp-windows-arm64.exe
+$dir = "$env:LOCALAPPDATA\Programs\bulp"
+New-Item -ItemType Directory -Force $dir | Out-Null
+Invoke-WebRequest https://github.com/Nilpointer/bulps/releases/latest/download/bulp-windows-amd64.exe -OutFile "$dir\bulp.exe"
+Unblock-File "$dir\bulp.exe"
+[Environment]::SetEnvironmentVariable("Path", [Environment]::GetEnvironmentVariable("Path", "User") + ";$dir", "User")
+```
+
+Open a new terminal (it picks up the new `PATH`), then run `bulp list`.
+
+- **Allow network access** if Windows Defender Firewall asks on the first `bulp list`: discovery listens
+  for the lights' multicast replies.
+- **Set `BULP_HOST`** for reliable commands, since multicast discovery often misses lights on Wi-Fi.
+  New terminals and agents started from them inherit it:
+  `[Environment]::SetEnvironmentVariable("BULP_HOST", "192.168.1.20", "User")` (comma-separate several
+  lights).
+- The binary isn't code-signed. `Unblock-File` stops Windows from treating it as an untrusted download.
+  If you downloaded it in a browser and SmartScreen still blocks it, choose **More info → Run anyway**.
 
 To let an agent use it, see [Scripts and AI agents](#scripts-and-ai-agents).
 
@@ -110,6 +137,20 @@ $ bulp -json status
   `BULP_HOST`.
 - **Allow it without prompts:** in Claude Code, add `"Bash(bulp:*)"` to `permissions.allow` in
   `.claude/settings.json` (or `~/.claude/settings.json`).
+
+What an agent runs for typical requests (the skill below teaches it the same mappings):
+
+| User says | Command |
+|---|---|
+| turn on / off / switch | `bulp on`, `bulp off`, `bulp toggle` |
+| set to 40 % | `bulp brightness 40` |
+| a bit dimmer / brighter | `bulp brightness -10` / `bulp brightness +10` |
+| warmer / cozier | `bulp temp 3000` (range 2900–7000 K; lower is warmer) |
+| cooler / daylight | `bulp temp 5600` |
+| make it blue (color lights only) | `bulp color 220 90` (hue 0–360, saturation 0–100) |
+| warmer, on a color light | `bulp -name strip color 30 70` (amber; color lights have no Kelvin) |
+| only the desk light | `bulp -name desk off` |
+| which light is which | `bulp identify` (the light blinks) |
 
 **Agent skill:** [`skills/bulp/SKILL.md`](skills/bulp/SKILL.md) teaches an agent when and how to use
 `bulp` (finding the command, reading the state first, mapping "a bit warmer" to a command, handling
