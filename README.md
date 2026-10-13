@@ -68,6 +68,67 @@ bulp identify | info | settings | rename "Desk"
 
 Flags: `-name <substr>` to pick lights, `-host <ip>` (or `BULP_HOST`) to skip discovery, `-json`.
 
+### Scripts and AI agents
+
+The `bulp` CLI is the interface for scripts and AI coding agents (Claude Code, Codex, …): it's
+non-interactive, exits with status 0 on success and 1 on errors (message on stderr), and with `-json`
+every command prints one array with an entry per light:
+
+```sh
+$ bulp -json status
+[{"name": "Desk Left", "host": "192.168.1.20:9123", "on": true, "brightness": 40, "kelvin": 3500},
+ {"name": "Shelf Strip", "host": "192.168.1.21:9123", "on": true, "brightness": 85, "hue": 265, "saturation": 80}]
+```
+
+- **Skip discovery:** `export BULP_HOST=192.168.1.20,192.168.1.21` (addresses from `bulp list`). Commands
+  then don't browse the network first, and always hit the same lights.
+- **Pick lights by name:** `-name desk` acts only on lights whose name contains "desk", with or without
+  `BULP_HOST`.
+- **Allow it without prompts:** in Claude Code, add `"Bash(bulp:*)"` to `permissions.allow` in
+  `.claude/settings.json` (or `~/.claude/settings.json`).
+
+**Agent skill:** [`skills/bulp/SKILL.md`](skills/bulp/SKILL.md) teaches an agent when and how to use
+`bulp` (finding the command, reading the state first, mapping "a bit warmer" to a command, handling
+unreachable lights), so it works from any directory. Install it for Claude Code with
+
+```sh
+mkdir -p ~/.claude/skills && cp -r skills/bulp ~/.claude/skills/
+```
+
+then just ask "dim the lights to 40%". Other agents that support the Agent Skills `SKILL.md` format load
+the same folder from their own skills directory.
+
+### Automating lights out
+
+For a fixed schedule, cron is all you need. Use the standalone CLI binary from the releases page (e.g.
+installed as `/usr/local/bin/bulp`), set `PATH` (cron's default doesn't include `/usr/local/bin`) and
+`BULP_HOST`, so it doesn't depend on network discovery at night. `crontab -e`:
+
+```cron
+PATH=/usr/local/bin:/usr/bin:/bin
+BULP_HOST=192.168.1.20,192.168.1.21
+# Lights off at 23:00 every day, and at 18:30 on weekdays
+0 23 * * *    bulp off
+30 18 * * 1-5 bulp off
+# Dim to 20 % and warm up at 21:00
+0 21 * * *    bulp brightness 20 && bulp temp 2900
+```
+
+A systemd user timer works the same way (`bulp off` as the service's `ExecStart`) and also catches up
+on runs missed while the computer was off (`Persistent=true`).
+
+Reach for an agent only when the rule needs judgment or context a schedule can't express, like "lights
+off, but keep the desk light on while I'm still in a video call". Run it headless from cron and allow it
+nothing but `bulp` and the checks it needs (the `PATH` and `BULP_HOST` lines from above apply to the
+agent's commands too):
+
+```cron
+0 23 * * * cd ~ && /home/you/.local/bin/claude -p "Turn off all lights. If Zoom or Teams is running, keep the desk light on." --allowedTools "Bash(bulp:*)" "Bash(pgrep:*)"
+```
+
+Whatever runs the schedule has to be on the same network as the lights: cloud-hosted agents and
+scheduled cloud tasks can't reach them.
+
 ## Build from source
 
 Go is pinned with [mise](https://mise.jdx.dev). The tray app needs cgo and the GTK 4 + WebKitGTK 6.0

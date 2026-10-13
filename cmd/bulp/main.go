@@ -10,6 +10,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"bulp/elgato"
@@ -38,12 +39,51 @@ type target struct {
 	client *elgato.Client
 }
 
+// host is the light's address as host:port.
+func (t target) host() string { return strings.TrimPrefix(t.client.BaseURL, "http://") }
+
+// With -json every command prints one array with an entry per light, so
+// scripts and agents can tell the lights apart.
+
+// lightJSON is the entry for commands that report a light's state; the
+// color temperature is in Kelvin, like the temp command takes it.
+type lightJSON struct {
+	Name       string   `json:"name"`
+	Host       string   `json:"host"`
+	On         *bool    `json:"on,omitempty"`
+	Brightness *int     `json:"brightness,omitempty"`
+	Kelvin     *int     `json:"kelvin,omitempty"`
+	Hue        *float64 `json:"hue,omitempty"`
+	Saturation *float64 `json:"saturation,omitempty"`
+}
+
+func newLightJSON(t target, s elgato.LightState) lightJSON {
+	j := lightJSON{Name: t.label, Host: t.host(), Brightness: s.Brightness, Hue: s.Hue, Saturation: s.Saturation}
+	if s.On != nil {
+		j.On = elgato.Ptr(*s.On == 1)
+	}
+	if s.Temperature != nil {
+		j.Kelvin = elgato.Ptr(elgato.MiredToKelvin(*s.Temperature))
+	}
+	return j
+}
+
+// detailJSON is the entry for everything else; commands without output
+// (identify, rename, changing settings) list just the lights they acted on.
+type detailJSON struct {
+	Name     string                `json:"name"`
+	Host     string                `json:"host"`
+	Info     *elgato.AccessoryInfo `json:"info,omitempty"`
+	Battery  *elgato.BatteryInfo   `json:"battery,omitempty"`
+	Settings *elgato.Settings      `json:"settings,omitempty"`
+}
+
 func main() {
 	fs := flag.NewFlagSet("bulp", flag.ExitOnError)
-	host := fs.String("host", os.Getenv("BULP_HOST"), "talk to this light directly (host[:port]), skipping discovery; env BULP_HOST")
+	host := fs.String("host", os.Getenv("BULP_HOST"), "talk to these lights directly (host[:port], comma-separated), skipping discovery; env BULP_HOST")
 	name := fs.String("name", "", "only act on lights whose name contains this text")
 	wait := fs.Duration("discover", 2*time.Second, "how long to browse for lights")
-	asJSON := fs.Bool("json", false, "print raw JSON")
+	asJSON := fs.Bool("json", false, "print JSON: one array with an entry per light")
 	fs.Usage = func() { fmt.Fprint(os.Stderr, usage); fs.PrintDefaults() }
 	fs.Parse(os.Args[1:])
 
@@ -63,38 +103,73 @@ func main() {
 	check(err)
 
 	failed := false
+	results := []any{} // printed as [] rather than null if every light failed
 	for _, t := range targets {
-		if err := run(ctx, t, cmd, args, *asJSON); err != nil {
+		res, err := run(ctx, t, cmd, args, *asJSON)
+		if err != nil {
 			fmt.Fprintf(os.Stderr, "%s: %v\n", t.label, err)
 			failed = true
+			continue
 		}
+		results = append(results, res)
+	}
+	if *asJSON {
+		check(printJSON(results))
 	}
 	if failed {
 		os.Exit(1)
 	}
 }
 
-func resolve(ctx context.Context, host, name string, wait time.Duration) ([]target, error) {
-	if host != "" {
-		return []target{{host, elgato.NewClient(host)}}, nil
-	}
-	dctx, cancel := context.WithTimeout(ctx, wait)
-	defer cancel()
-	devices, err := elgato.Discover(dctx)
-	if err != nil {
-		return nil, err
+func resolve(ctx context.Context, hosts, name string, wait time.Duration) ([]target, error) {
+	var all []target
+	if hosts != "" {
+		all = named(ctx, hosts)
+	} else {
+		dctx, cancel := context.WithTimeout(ctx, wait)
+		defer cancel()
+		devices, err := elgato.Discover(dctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, d := range devices {
+			all = append(all, target{d.Instance, d.Client()})
+		}
 	}
 	var out []target
-	for _, d := range devices {
-		if name != "" && !strings.Contains(strings.ToLower(d.Instance), strings.ToLower(name)) {
-			continue
+	for _, t := range all {
+		if name == "" || strings.Contains(strings.ToLower(t.label), strings.ToLower(name)) {
+			out = append(out, t)
 		}
-		out = append(out, target{d.Instance, d.Client()})
 	}
 	if len(out) == 0 {
 		return nil, errors.New("no matching lights found (try -discover 5s or -host)")
 	}
 	return out, nil
+}
+
+// named makes targets for comma-separated addresses, named like discovery
+// would name them (asking the lights in parallel); a light that doesn't
+// answer keeps its address as name, and the command reports its error.
+func named(ctx context.Context, hosts string) []target {
+	var out []target
+	for h := range strings.SplitSeq(hosts, ",") {
+		if h = strings.TrimSpace(h); h != "" {
+			out = append(out, target{h, elgato.NewClient(h)})
+		}
+	}
+	var wg sync.WaitGroup
+	for i := range out {
+		wg.Go(func() {
+			ictx, cancel := context.WithTimeout(ctx, 2*time.Second)
+			defer cancel()
+			if info, err := out[i].client.AccessoryInfo(ictx); err == nil && info.Name() != "" {
+				out[i].label = info.Name()
+			}
+		})
+	}
+	wg.Wait()
+	return out
 }
 
 func list(ctx context.Context, wait time.Duration, asJSON bool) error {
@@ -116,21 +191,18 @@ func list(ctx context.Context, wait time.Duration, asJSON bool) error {
 	return nil
 }
 
-func run(ctx context.Context, t target, cmd string, args []string, asJSON bool) error {
+// run executes cmd on one light. It prints text output itself and returns
+// the light's entry for -json.
+func run(ctx context.Context, t target, cmd string, args []string, asJSON bool) (any, error) {
 	c := t.client
+	done := detailJSON{Name: t.label, Host: t.host()}
 	switch cmd {
 	case "status":
 		l, err := c.Lights(ctx)
 		if err != nil {
-			return err
+			return nil, err
 		}
-		if asJSON {
-			return printJSON(l)
-		}
-		for _, s := range l.Lights {
-			fmt.Printf("%-28s %s\n", t.label, describe(s))
-		}
-		return nil
+		return report(t, l, asJSON)
 
 	case "on", "off":
 		return set(ctx, t, elgato.LightState{On: elgato.Ptr(boolInt(cmd == "on"))}, asJSON)
@@ -138,23 +210,23 @@ func run(ctx context.Context, t target, cmd string, args []string, asJSON bool) 
 	case "toggle":
 		l, err := c.Lights(ctx)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		on := len(l.Lights) > 0 && l.Lights[0].On != nil && *l.Lights[0].On == 1
 		return set(ctx, t, elgato.LightState{On: elgato.Ptr(boolInt(!on))}, asJSON)
 
 	case "brightness":
 		if len(args) != 1 {
-			return errors.New("usage: brightness <0-100|+n|-n>")
+			return nil, errors.New("usage: brightness <0-100|+n|-n>")
 		}
 		n, err := strconv.Atoi(args[0])
 		if err != nil {
-			return fmt.Errorf("invalid brightness %q", args[0])
+			return nil, fmt.Errorf("invalid brightness %q", args[0])
 		}
 		if args[0][0] == '+' || args[0][0] == '-' {
 			l, err := c.Lights(ctx)
 			if err != nil {
-				return err
+				return nil, err
 			}
 			if len(l.Lights) > 0 && l.Lights[0].Brightness != nil {
 				n += *l.Lights[0].Brightness
@@ -164,35 +236,36 @@ func run(ctx context.Context, t target, cmd string, args []string, asJSON bool) 
 
 	case "temp":
 		if len(args) != 1 {
-			return errors.New("usage: temp <kelvin>")
+			return nil, errors.New("usage: temp <kelvin>")
 		}
 		k, err := strconv.Atoi(strings.TrimSuffix(strings.ToUpper(args[0]), "K"))
 		if err != nil {
-			return fmt.Errorf("invalid temperature %q", args[0])
+			return nil, fmt.Errorf("invalid temperature %q", args[0])
 		}
 		return set(ctx, t, elgato.LightState{Temperature: elgato.Ptr(elgato.KelvinToMired(k))}, asJSON)
 
 	case "color":
 		if len(args) != 2 {
-			return errors.New("usage: color <hue 0-360> <saturation 0-100>")
+			return nil, errors.New("usage: color <hue 0-360> <saturation 0-100>")
 		}
 		h, err1 := strconv.ParseFloat(args[0], 64)
 		s, err2 := strconv.ParseFloat(args[1], 64)
 		if err1 != nil || err2 != nil {
-			return errors.New("hue and saturation must be numbers")
+			return nil, errors.New("hue and saturation must be numbers")
 		}
 		return set(ctx, t, elgato.LightState{Hue: &h, Saturation: &s}, asJSON)
 
 	case "identify":
-		return c.Identify(ctx)
+		return done, c.Identify(ctx)
 
 	case "info":
 		a, err := c.AccessoryInfo(ctx)
 		if err != nil {
-			return err
+			return nil, err
 		}
+		done.Info = a
 		if asJSON {
-			return printJSON(a)
+			return done, nil
 		}
 		fmt.Printf("%s\n  product   %s (board %d, rev %g)\n  serial    %s\n  mac       %s\n  firmware  %s (build %d)\n  features  %s\n",
 			t.label, a.ProductName, a.HardwareBoardType, a.HardwareRevision, a.SerialNumber,
@@ -200,56 +273,65 @@ func run(ctx context.Context, t target, cmd string, args []string, asJSON bool) 
 		if a.WiFi != nil {
 			fmt.Printf("  wifi      %s, %d MHz, %d dBm\n", a.WiFi.SSID, a.WiFi.FrequencyMHz, a.WiFi.RSSI)
 		}
-		return nil
+		return done, nil
 
 	case "battery":
 		b, err := c.BatteryInfo(ctx)
 		if err != nil {
-			return err
+			return nil, err
 		}
-		if asJSON {
-			return printJSON(b)
+		done.Battery = b
+		if !asJSON {
+			fmt.Printf("%-28s level %g%%, status %g, power source %g, %gV\n",
+				t.label, b.Level, b.Status, b.PowerSource, b.CurrentBatteryVoltage)
 		}
-		fmt.Printf("%-28s level %g%%, status %g, power source %g, %gV\n",
-			t.label, b.Level, b.Status, b.PowerSource, b.CurrentBatteryVoltage)
-		return nil
+		return done, nil
 
 	case "settings":
 		if len(args) == 0 {
 			s, err := c.Settings(ctx)
 			if err != nil {
-				return err
+				return nil, err
 			}
-			fmt.Printf("%s\n", t.label)
-			return printJSON(s)
+			done.Settings = s
+			if !asJSON {
+				fmt.Printf("%s\n", t.label)
+				return done, printJSON(s)
+			}
+			return done, nil
 		}
 		s, err := parseSettings(args)
 		if err != nil {
-			return err
+			return nil, err
 		}
-		return c.SetSettings(ctx, s)
+		return done, c.SetSettings(ctx, s)
 
 	case "rename":
 		if len(args) != 1 {
-			return errors.New("usage: rename <name>")
+			return nil, errors.New("usage: rename <name>")
 		}
-		return c.SetDisplayName(ctx, args[0])
+		return done, c.SetDisplayName(ctx, args[0])
 	}
-	return fmt.Errorf("unknown command %q (run bulp -h)", cmd)
+	return nil, fmt.Errorf("unknown command %q (run bulp -h)", cmd)
 }
 
-func set(ctx context.Context, t target, s elgato.LightState, asJSON bool) error {
+func set(ctx context.Context, t target, s elgato.LightState, asJSON bool) (any, error) {
 	l, err := t.client.SetLights(ctx, s)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	if asJSON {
-		return printJSON(l)
+	return report(t, l, asJSON)
+}
+
+// report prints a light's state as text, or returns its -json entry.
+func report(t target, l *elgato.Lights, asJSON bool) (any, error) {
+	if len(l.Lights) == 0 {
+		return nil, errors.New("light returned no state")
 	}
-	for _, s := range l.Lights {
-		fmt.Printf("%-28s %s\n", t.label, describe(s))
+	if !asJSON {
+		fmt.Printf("%-28s %s\n", t.label, describe(l.Lights[0]))
 	}
-	return nil
+	return newLightJSON(t, l.Lights[0]), nil
 }
 
 func describe(s elgato.LightState) string {

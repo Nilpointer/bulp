@@ -44,6 +44,16 @@
   </branding>
 
   <releases>
+    <release version="1.1.0" date="2026-10-13">
+      <description>
+        <p>Better for scripts and AI agents:</p>
+        <ul>
+          <li>The CLI's JSON output is one list with each light's name, address and color temperature in Kelvin</li>
+          <li>BULP_HOST and -host accept several lights, and -name works together with them</li>
+          <li>An agent skill (skills/bulp) teaches AI agents how to control the lights</li>
+        </ul>
+      </description>
+    </release>
     <release version="1.0.0" date="2026-10-13">
       <description>
         <p>First release.</p>
