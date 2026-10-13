@@ -1,0 +1,64 @@
+name: Bug report
+description: Something in Bulp doesn't work
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What did you do, what did you expect, and what happened instead?
+    validations:
+      required: true
+  - type: dropdown
+    id: install
+    attributes:
+      label: How did you install Bulp?
+      options:
+        - Flatpak
+        - AppImage
+        - Built from source
+        - CLI binary (bulp-<os>-<arch>)
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Bulp version
+      placeholder: e.g. 1.0.0
+    validations:
+      required: true
+  - type: input
+    id: distro
+    attributes:
+      label: Distribution and version
+      placeholder: e.g. Fedora 44, Ubuntu 24.04
+    validations:
+      required: true
+  - type: dropdown
+    id: desktop
+    attributes:
+      label: Desktop
+      options:
+        - GNOME (with AppIndicator extension)
+        - GNOME (without AppIndicator extension)
+        - KDE Plasma
+        - Cinnamon / MATE / Budgie
+        - XFCE
+        - Sway / Hyprland / other Wayland compositor
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: lights
+    attributes:
+      label: Light model(s) and firmware
+      description: Shown in the light's details in the control panel, or with `bulp info`.
+      placeholder: e.g. Key Light Air, firmware 1.0.3
+  - type: textarea
+    id: logs
+    attributes:
+      label: Terminal output
+      description: >
+        Start Bulp from a terminal (`flatpak run de.codecauldron.Bulp`, or run the AppImage) and paste what
+        it prints. Please remove serial numbers or anything else you'd rather not share.
+      render: text
