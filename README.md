@@ -25,7 +25,7 @@ Downloads are on the [releases page](https://github.com/Nilpointer/bulps/release
 |---|---|
 | **Flatpak** `de.codecauldron.Bulp.flatpak` | `flatpak install --user de.codecauldron.Bulp.flatpak`, then start Bulp from your app launcher. Pulls the GNOME runtime from Flathub. Includes the CLI: `flatpak run --command=bulp de.codecauldron.Bulp`. |
 | **AppImage** `Bulp-<version>-x86_64.AppImage` | `chmod +x` and run. Shows the panel in a native window if GTK 4 + WebKitGTK 6.0 are installed (Ubuntu 24.04+, Debian 12+, current Fedora/Arch), otherwise in your browser. |
-| **CLI** `bulp-<os>-<arch>` | Single static binary for Linux, macOS and Windows (amd64/arm64); see [macOS](#cli-on-macos) and [Windows](#cli-on-windows) below. |
+| **CLI** `bulp-<os>-<arch>` | Single static binary for Linux, macOS and Windows (amd64/arm64); see [Linux](#cli-on-linux), [macOS](#cli-on-macos) and [Windows](#cli-on-windows) below. |
 
 ### Tray icon on GNOME
 
@@ -40,6 +40,39 @@ gnome-extensions enable appindicatorsupport@rgcjonas.gmail.com
 ```
 
 Without a tray, Bulp runs as just the control panel window and quits when you close it.
+
+### CLI on Linux
+
+Put the `bulp` binary into a directory that's already on your `PATH`, so your shell, scripts and agents
+find it without any `PATH` changes. Download it first (on ARM machines use `bulp-linux-arm64`):
+
+```sh
+curl -fLo /tmp/bulp https://github.com/Nilpointer/bulps/releases/latest/download/bulp-linux-amd64
+```
+
+- **For all users: `/usr/local/bin`.** It's on the default `PATH` of every distribution and meant for
+  software you install yourself:
+  ```sh
+  sudo install -m 755 /tmp/bulp /usr/local/bin/bulp
+  ```
+- **Just for you, without sudo: `~/.local/bin`.** Fedora, Ubuntu, Debian, openSUSE and most other
+  distributions add it to your `PATH` once it exists (Ubuntu/Debian from the next login on):
+  ```sh
+  install -Dm 755 /tmp/bulp ~/.local/bin/bulp
+  ```
+  Check with `command -v bulp`. If that prints nothing even after logging in again, your distribution
+  doesn't include `~/.local/bin` (stock Arch, for example); use `/usr/local/bin` instead.
+
+Then run `bulp list`. If you installed the Flatpak, you can skip the download and make its built-in CLI
+available as `bulp` with a small wrapper instead:
+
+```sh
+mkdir -p ~/.local/bin
+printf '#!/bin/sh\nexec flatpak run --command=bulp de.codecauldron.Bulp "$@"\n' > ~/.local/bin/bulp
+chmod +x ~/.local/bin/bulp
+```
+
+(It starts more slowly than the plain binary, which matters little for occasional commands.)
 
 ### CLI on macOS
 
@@ -156,19 +189,49 @@ What an agent runs for typical requests (the skill below teaches it the same map
 `bulp` (finding the command, reading the state first, mapping "a bit warmer" to a command, handling
 unreachable lights), so it works from any directory.
 
-**Claude Code plugin (recommended):** this repo is also a plugin marketplace. In Claude Code, run
+#### Claude Code plugin (recommended)
+
+This repo is also a Claude Code plugin marketplace, so the skill installs and updates like any plugin.
+You still need the `bulp` command itself ([Linux](#cli-on-linux), [macOS](#cli-on-macos),
+[Windows](#cli-on-windows); on Linux the skill falls back to the Flatpak's CLI if `bulp` isn't on
+your `PATH`).
+
+**Install**, either inside Claude Code or from a terminal:
 
 ```text
 /plugin install bulp --marketplace Nilpointer/bulps
 ```
+```sh
+claude plugin install bulp --marketplace Nilpointer/bulps
+```
 
-(on versions before 2.1.275: `/plugin marketplace add Nilpointer/bulps`, then `/plugin install bulp@bulps`),
-then just ask "dim the lights to 40%". The skill runs `bulp` without permission prompts, and
-`/plugin update bulp` picks up new versions of it. You still need the `bulp` command itself (see
-[Install](#install)).
+On Claude Code before 2.1.275, add the marketplace first: `claude plugin marketplace add Nilpointer/bulps`,
+then `claude plugin install bulp@bulps`. The plugin is installed for your user in all projects. With
+`--scope project` it's recorded in the project's `.claude/settings.json` instead, so everyone working on
+that repository gets it.
 
-**Skill only:** for other agents that support the Agent Skills `SKILL.md` format, or to manage it by hand
-in Claude Code, copy the folder into the agent's skills directory:
+**Use:** just ask, in any directory: "dim the lights to 40%", "make it warmer", "turn off the desk light",
+"what are my lights set to?". Claude picks the skill up by itself. You can also call it directly as a
+slash command, e.g. `/bulp:bulp status`. While the skill runs, `bulp` commands need no permission
+prompts; the skill allows them itself.
+
+**Manage it:**
+
+| Task | Command |
+|---|---|
+| show what's installed | `claude plugin list`, or `/plugin` inside Claude Code |
+| see what the plugin adds and its token cost | `claude plugin details bulp@bulps` |
+| update to a new version | `claude plugin marketplace update bulps`, then `claude plugin update bulp@bulps`, then restart Claude Code |
+| turn it off for a while | `claude plugin disable bulp@bulps` (back on: `claude plugin enable bulp@bulps`) |
+| remove it | `claude plugin uninstall bulp@bulps`, and optionally `claude plugin marketplace remove bulps` |
+
+If you copied the skill by hand earlier, delete that copy (`rm -r ~/.claude/skills/bulp`), or Claude sees
+the skill twice (`bulp` and `bulp:bulp`).
+
+#### Skill for other agents
+
+For other agents that support the Agent Skills `SKILL.md` format, or to manage the skill by hand in
+Claude Code, copy the folder into the agent's skills directory:
 
 ```sh
 mkdir -p ~/.claude/skills && cp -r skills/bulp ~/.claude/skills/
