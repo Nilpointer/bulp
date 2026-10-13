@@ -1,0 +1,39 @@
+name: macOS app
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to attach the build of this branch to (empty = just build)
+        required: false
+
+permissions:
+  contents: write # attach the app to the tag's release
+
+env:
+  TAG: ${{ inputs.tag || (startsWith(github.ref, 'refs/tags/') && github.ref_name) || '' }}
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+      - run: go test ./...
+      - run: packaging/macos/build.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: macOS-app
+          path: build/*-macOS.zip
+      - name: Attach to release
+        if: env.TAG != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # The release may not exist yet if the tag was pushed before it was created.
+          gh release upload "$TAG" build/*-macOS.zip --clobber ||
+            gh release create "$TAG" build/*-macOS.zip --title "$TAG" --notes ""

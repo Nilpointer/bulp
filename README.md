@@ -1,6 +1,17 @@
 # bulps
 
+> **AI generated:** this project was written with [Claude Code](https://claude.com/claude-code), Anthropic's
+> AI coding assistant, directed by its author and tested against real lights.
+> Expect the rough edges of a young project, and please report anything that doesn't work.
+
 Control Elgato lights (Key Light, Ring Light, Light Strip, …) from Go, over their local HTTP API.
+
+<p>
+  <img src="docs/screenshots/panel-light.png" alt="Control panel in light mode: power, color temperature and brightness for an Elgato Ring Light" width="389">
+  <img src="docs/screenshots/panel-dark.png" alt="The same control panel in dark mode" width="389">
+</p>
+
+Downloads (Linux AppImage and Flatpak, macOS app, CLI) are on the [releases page](https://github.com/Nilpointer/bulps/releases).
 
 - `elgato/` – library: Bonjour discovery and an HTTP client for the lights' API (port 9123)
 - `cmd/elg` – CLI
@@ -16,6 +27,7 @@ mise run build-linux   # static Linux binaries in bin/linux-{amd64,arm64}/ (no c
 mise run test
 mise run flatpak       # build + install the Flatpak locally, then: flatpak run de.codecauldron.Elg
 mise run appimage      # build/Elgato_Lights-<version>-x86_64.AppImage (needs podman or docker)
+mise run macos-app     # build/Elgato_Lights-<version>-macOS.zip, universal .app (on macOS)
 ```
 
 The Flatpak (`packaging/flatpak/de.codecauldron.Elg.yml`) uses the GNOME 51 runtime, which ships GTK 4 and
@@ -67,3 +79,10 @@ gnome-extensions enable appindicatorsupport@rgcjonas.gmail.com
 
 `-host a,b` skips Bonjour discovery if multicast is blocked. On Linux, discovery goes through the Avahi
 daemon when it's running (much more reliable than querying directly), else plain multicast.
+
+## macOS app downloads
+
+`.github/workflows/macos.yml` builds the universal `.app` on a GitHub macOS runner for every `v*` tag and
+attaches it to that release (or run it manually, optionally naming a tag to attach to). The app is
+ad-hoc signed, not notarized: on first launch macOS refuses to open it. Allow it via System Settings →
+Privacy & Security → "Open Anyway", or `xattr -dr com.apple.quarantine "Elgato Lights.app"`.

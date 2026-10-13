@@ -39,3 +39,7 @@ run = "packaging/appimage/build.sh"
 description = "Single-file build/de.codecauldron.Elg.flatpak for releases (pulls the runtime from Flathub on install)"
 depends = ["flatpak"]
 run = "flatpak build-bundle --runtime-repo=https://dl.flathub.org/repo/flathub.flatpakrepo build/flatpak-repo build/de.codecauldron.Elg.flatpak de.codecauldron.Elg"
+
+[tasks.macos-app]
+description = "Build build/Elgato_Lights-<version>-macOS.zip (universal .app; run on macOS)"
+run = "packaging/macos/build.sh"
