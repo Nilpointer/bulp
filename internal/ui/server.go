@@ -1,4 +1,4 @@
-// Package ui serves the menu-bar popover's web UI and a small JSON API
+// Package ui serves the control panel's web UI and a small JSON API
 // on 127.0.0.1. Every route sits under a random per-launch token so other
 // local processes and web pages can't drive the lights through it.
 package ui
@@ -20,7 +20,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"elg/elgato"
+	"bulp/elgato"
 )
 
 //go:embed web
@@ -303,7 +303,7 @@ func (s *Server) handleSet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if s.OnChange != nil && patch.On != nil {
-		go s.Lights(context.Background()) // let the menu-bar/tray icon catch up
+		go s.Lights(context.Background()) // let the tray icon catch up
 	}
 	writeJSON(w, st.Lights[0])
 }

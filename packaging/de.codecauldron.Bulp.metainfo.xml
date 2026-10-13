@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop-application">
-  <id>de.codecauldron.Elg</id>
+  <id>de.codecauldron.Bulp</id>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>MIT</project_license>
 
-  <name>Elgato Lights</name>
+  <name>Bulp</name>
   <summary>Control your Elgato lights from the desktop</summary>
   <developer id="de.codecauldron">
     <name>Andreas Ulrich</name>
@@ -24,7 +24,7 @@
     <p>This is an unofficial app, not affiliated with or endorsed by Elgato or Corsair.</p>
   </description>
 
-  <launchable type="desktop-id">de.codecauldron.Elg.desktop</launchable>
+  <launchable type="desktop-id">de.codecauldron.Bulp.desktop</launchable>
   <url type="homepage">https://github.com/Nilpointer/bulps</url>
   <url type="bugtracker">https://github.com/Nilpointer/bulps/issues</url>
   <url type="vcs-browser">https://github.com/Nilpointer/bulps</url>

@@ -1,4 +1,4 @@
-module elg
+module bulp
 
 go 1.27.2
 

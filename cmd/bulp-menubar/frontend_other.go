@@ -1,4 +1,4 @@
-//go:build !darwin && !linux
+//go:build !linux
 
 package main
 
@@ -6,7 +6,7 @@ import (
 	"context"
 	"fmt"
 
-	"elg/internal/ui"
+	"bulp/internal/ui"
 )
 
 // Other platforms: no tray integration yet, just serve the panel.

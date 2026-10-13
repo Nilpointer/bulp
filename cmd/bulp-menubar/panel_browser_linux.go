@@ -2,7 +2,7 @@
 
 package main
 
-import "elg/internal/ui"
+import "bulp/internal/ui"
 
 // Without cgo there's no native window; closed runs when the page is closed.
 func newPanel(srv *ui.Server, closed func()) panel { return newBrowserPanel(srv, closed) }

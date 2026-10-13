@@ -1,8 +1,8 @@
 //go:build linux && cgo
 
 // Package webview shows the control panel in a native GTK window hosting a
-// WebKitGTK web view (Linux counterpart of the macOS popover). It runs as a
-// single-instance GtkApplication: launching the app again raises the window.
+// WebKitGTK web view. It runs as a single-instance GtkApplication: launching
+// the app again raises the window.
 package webview
 
 /*

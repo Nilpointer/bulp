@@ -1,11 +1,11 @@
 # Local build: mise run flatpak (vendors Go modules first; the build has no network).
-id: de.codecauldron.Elg
+id: de.codecauldron.Bulp
 runtime: org.gnome.Platform
 runtime-version: '51' # ships GTK 4 and WebKitGTK 6.0
 sdk: org.gnome.Sdk
 sdk-extensions:
   - org.freedesktop.Sdk.Extension.golang
-command: elg-menubar
+command: bulp-menubar
 finish-args:
   - --share=network # the lights' HTTP API and Bonjour discovery
   - --system-talk-name=org.freedesktop.Avahi # discovery via the system's mDNS daemon
@@ -21,14 +21,14 @@ build-options:
     GOFLAGS: -mod=vendor -trimpath
     GOTOOLCHAIN: local
 modules:
-  - name: elg
+  - name: bulp
     buildsystem: simple
     build-commands:
-      - go build -o /app/bin/elg-menubar ./cmd/elg-menubar
-      - go build -o /app/bin/elg ./cmd/elg # flatpak run --command=elg de.codecauldron.Elg
-      - install -Dm644 packaging/de.codecauldron.Elg.desktop -t /app/share/applications
-      - install -Dm644 packaging/de.codecauldron.Elg.metainfo.xml -t /app/share/metainfo
-      - install -Dm644 packaging/de.codecauldron.Elg.svg -t /app/share/icons/hicolor/scalable/apps
+      - go build -o /app/bin/bulp-menubar ./cmd/bulp-menubar
+      - go build -o /app/bin/bulp ./cmd/bulp # flatpak run --command=bulp de.codecauldron.Bulp
+      - install -Dm644 packaging/de.codecauldron.Bulp.desktop -t /app/share/applications
+      - install -Dm644 packaging/de.codecauldron.Bulp.metainfo.xml -t /app/share/metainfo
+      - install -Dm644 packaging/de.codecauldron.Bulp.svg -t /app/share/icons/hicolor/scalable/apps
     sources:
       - type: dir
         path: ../..

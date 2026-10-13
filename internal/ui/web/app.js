@@ -43,7 +43,6 @@ function render(lights) {
   $('#empty').hidden = lights.length > 0;
   if (!$('#rescan').classList.contains('spinning')) $('#empty-title').textContent = 'No Accessories Found';
   $('#all-power').classList.toggle('on', lights.some(isOn));
-  resize();
 }
 
 function createRow(id) {
@@ -53,7 +52,7 @@ function createRow(id) {
     const l = rows.get(id).light;
     send(id, { on: isOn(l) ? 0 : 1 });
   };
-  $('.settings', el).onclick = () => { $('.details', el).hidden ^= 1; resize(); };
+  $('.settings', el).onclick = () => { $('.details', el).hidden ^= 1; };
   $('.identify', el).onclick = () => api(`api/lights/${encodeURIComponent(id)}/identify`, { method: 'POST' }).catch(showError);
 
   const bind = (cls, key, label) => {
@@ -223,40 +222,22 @@ function showError(e) {
   const t = $('#toast');
   t.textContent = e.message || String(e);
   t.hidden = false;
-  resize();
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => { t.hidden = true; resize(); }, 4000);
+  toastTimer = setTimeout(() => { t.hidden = true; }, 4000);
 }
 
-function resize() {
-  requestAnimationFrame(() => {
-    const h = document.body.scrollHeight;
-    window.webkit?.messageHandlers?.resize?.postMessage(h);
-  });
-}
-
-// Called by the Cocoa side when the popover opens/closes.
-window.onPopoverShow = () => {
-  refresh();
+// Poll while the window is visible; hiding it closes menus and details.
+function sync() {
   clearInterval(pollTimer);
+  if (document.hidden) {
+    menu.hidden = true;
+    for (const row of rows.values()) $('.details', row.el).hidden = true;
+    return;
+  }
+  refresh();
   pollTimer = setInterval(refresh, 4000);
-};
-window.onPopoverHide = () => {
-  clearInterval(pollTimer);
-  menu.hidden = true;
-  for (const row of rows.values()) $('.details', row.el).hidden = true;
-};
-
-// Outside the macOS popover (Linux app window, plain browser) there are no
-// show/hide callbacks: poll while the page is visible instead.
-const inPopover = !!window.webkit?.messageHandlers?.resize;
-if (inPopover) {
-  refresh();
-} else {
-  document.documentElement.classList.add('standalone');
-  const sync = () => (document.hidden ? window.onPopoverHide() : window.onPopoverShow());
-  document.addEventListener('visibilitychange', sync);
-  sync();
-  // Lets the app exit with its window when there's no tray icon to keep it around.
-  window.addEventListener('pagehide', () => navigator.sendBeacon('api/closed'));
 }
+document.addEventListener('visibilitychange', sync);
+sync();
+// Lets the app exit with its window when there's no tray icon to keep it around.
+window.addEventListener('pagehide', () => navigator.sendBeacon('api/closed'));

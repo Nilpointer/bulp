@@ -2,10 +2,10 @@
 go = "1.27"
 
 [tasks.build]
-description = "Build the CLI and the menu-bar app"
+description = "Build the CLI and the tray app"
 run = [
-  "go build -o bin/elg ./cmd/elg",
-  "go build -o bin/elg-menubar ./cmd/elg-menubar",
+  "go build -o bin/bulp ./cmd/bulp",
+  "go build -o bin/bulp-menubar ./cmd/bulp-menubar",
 ]
 
 [tasks.build-linux]
@@ -20,26 +20,22 @@ run = [
 run = "go test ./..."
 
 [tasks.menubar]
-description = "Build and run the menu-bar app"
+description = "Build and run the tray app"
 depends = ["build"]
-run = "./bin/elg-menubar"
+run = "./bin/bulp-menubar"
 
 [tasks.flatpak]
-description = "Build and install the Flatpak locally (flatpak run de.codecauldron.Elg)"
+description = "Build and install the Flatpak locally (flatpak run de.codecauldron.Bulp)"
 run = [
   "go mod vendor", # the build has no network; removed again so local builds don't use it
-  "flatpak run org.flatpak.Builder --user --install --force-clean --install-deps-from=flathub --repo=build/flatpak-repo build/flatpak packaging/flatpak/de.codecauldron.Elg.yml; s=$?; rm -rf vendor; exit $s",
+  "flatpak run org.flatpak.Builder --user --install --force-clean --install-deps-from=flathub --repo=build/flatpak-repo build/flatpak packaging/flatpak/de.codecauldron.Bulp.yml; s=$?; rm -rf vendor; exit $s",
 ]
 
 [tasks.appimage]
-description = "Build build/Elgato_Lights-<version>-x86_64.AppImage (needs podman or docker)"
+description = "Build build/Bulp-<version>-x86_64.AppImage (needs podman or docker)"
 run = "packaging/appimage/build.sh"
 
 [tasks.flatpak-bundle]
-description = "Single-file build/de.codecauldron.Elg.flatpak for releases (pulls the runtime from Flathub on install)"
+description = "Single-file build/de.codecauldron.Bulp.flatpak for releases (pulls the runtime from Flathub on install)"
 depends = ["flatpak"]
-run = "flatpak build-bundle --runtime-repo=https://dl.flathub.org/repo/flathub.flatpakrepo build/flatpak-repo build/de.codecauldron.Elg.flatpak de.codecauldron.Elg"
-
-[tasks.macos-app]
-description = "Build build/Elgato_Lights-<version>-macOS.zip (universal .app; run on macOS)"
-run = "packaging/macos/build.sh"
+run = "flatpak build-bundle --runtime-repo=https://dl.flathub.org/repo/flathub.flatpakrepo build/flatpak-repo build/de.codecauldron.Bulp.flatpak de.codecauldron.Bulp"

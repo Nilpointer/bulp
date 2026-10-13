@@ -7,12 +7,12 @@ import (
 	"log"
 	"os"
 
-	"elg/internal/ui"
-	"elg/internal/webview"
+	"bulp/internal/ui"
+	"bulp/internal/webview"
 )
 
 // appID names the app to the desktop (Wayland, .desktop file, Flatpak).
-const appID = "de.codecauldron.Elg"
+const appID = "de.codecauldron.Bulp"
 
 // webviewPanel is a native GTK window with WebKitGTK.
 type webviewPanel struct{}

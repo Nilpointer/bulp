@@ -1,4 +1,4 @@
-// Command elg controls Elgato lights on the local network.
+// Command bulp controls Elgato lights on the local network.
 package main
 
 import (
@@ -12,10 +12,10 @@ import (
 	"strings"
 	"time"
 
-	"elg/elgato"
+	"bulp/elgato"
 )
 
-const usage = `usage: elg [flags] <command> [args]
+const usage = `usage: bulp [flags] <command> [args]
 
 commands:
   list                       discover lights on the network
@@ -39,8 +39,8 @@ type target struct {
 }
 
 func main() {
-	fs := flag.NewFlagSet("elg", flag.ExitOnError)
-	host := fs.String("host", os.Getenv("ELG_HOST"), "talk to this light directly (host[:port]), skipping discovery; env ELG_HOST")
+	fs := flag.NewFlagSet("bulp", flag.ExitOnError)
+	host := fs.String("host", os.Getenv("BULP_HOST"), "talk to this light directly (host[:port]), skipping discovery; env BULP_HOST")
 	name := fs.String("name", "", "only act on lights whose name contains this text")
 	wait := fs.Duration("discover", 2*time.Second, "how long to browse for lights")
 	asJSON := fs.Bool("json", false, "print raw JSON")
@@ -235,7 +235,7 @@ func run(ctx context.Context, t target, cmd string, args []string, asJSON bool) 
 		}
 		return c.SetDisplayName(ctx, args[0])
 	}
-	return fmt.Errorf("unknown command %q (run elg -h)", cmd)
+	return fmt.Errorf("unknown command %q (run bulp -h)", cmd)
 }
 
 func set(ctx context.Context, t target, s elgato.LightState, asJSON bool) error {
@@ -310,7 +310,7 @@ func printJSON(v any) error {
 
 func check(err error) {
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "elg:", err)
+		fmt.Fprintln(os.Stderr, "bulp:", err)
 		os.Exit(1)
 	}
 }

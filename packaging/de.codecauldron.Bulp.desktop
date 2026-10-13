@@ -1,10 +1,10 @@
 [Desktop Entry]
 Type=Application
-Name=Elgato Lights
+Name=Bulp
 GenericName=Light Control
 Comment=Control Elgato Key Lights, Ring Lights and Light Strips on your network
-Exec=elg-menubar
-Icon=de.codecauldron.Elg
+Exec=bulp-menubar
+Icon=de.codecauldron.Bulp
 Terminal=false
 Categories=Utility;
 Keywords=Elgato;Key Light;Ring Light;Light Strip;brightness;color temperature;

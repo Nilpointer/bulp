@@ -19,8 +19,8 @@ static gboolean on_close_request(GtkWindow *w, gpointer data) {
 static void present(void) {
 	if (!win) {
 		win = gtk_application_window_new(app);
-		gtk_window_set_title(GTK_WINDOW(win), "Elgato Lights");
-		gtk_window_set_default_size(GTK_WINDOW(win), 389, 560); // same as the macOS popover
+		gtk_window_set_title(GTK_WINDOW(win), "Bulp");
+		gtk_window_set_default_size(GTK_WINDOW(win), 389, 560);
 		GtkWidget *web = webkit_web_view_new();
 		webkit_web_view_load_uri(WEBKIT_WEB_VIEW(web), page_url);
 		gtk_window_set_child(GTK_WINDOW(win), web);
@@ -41,7 +41,7 @@ static void on_activate(GApplication *a, gpointer data) {
 // wv_init returns 0 if GTK can't start, 1 for the primary instance, and 2 if
 // another instance already runs (it has been asked to show its window).
 int wv_init(const char *app_id) {
-	g_set_application_name("Elgato Lights");
+	g_set_application_name("Bulp");
 	if (!gtk_init_check()) return 0;
 	app = gtk_application_new(app_id, G_APPLICATION_DEFAULT_FLAGS);
 	g_signal_connect(app, "activate", G_CALLBACK(on_activate), NULL);

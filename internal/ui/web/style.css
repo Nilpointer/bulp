@@ -32,9 +32,10 @@
 * { box-sizing: border-box; }
 html, body {
   margin: 0;
-  background: transparent; /* the popover draws the vibrant background */
+  height: 100%;
+  background: var(--window-bg);
   color: var(--text);
-  font: 13px/1.3 -apple-system, BlinkMacSystemFont, sans-serif;
+  font: 13px/1.3 system-ui, sans-serif;
   -webkit-user-select: none;
   user-select: none;
   cursor: default;
@@ -89,13 +90,11 @@ header {
 .menu button:hover { background: var(--accent); color: #fff; }
 .menu hr { border: 0; border-top: 1px solid var(--sep); margin: 5px 0; }
 
-/* In a standalone window the page fills it and the list scrolls. */
-.standalone, .standalone body { height: 100%; }
-.standalone body { display: flex; flex-direction: column; background: var(--window-bg); }
-.standalone main { flex: 1; max-height: none; }
+/* The page fills the window and the list scrolls. */
+body { display: flex; flex-direction: column; }
 
 /* Light list */
-main { max-height: 640px; overflow-y: auto; }
+main { flex: 1; overflow-y: auto; }
 .light { padding: 8px 20px 10px; }
 .light + .light { border-top: 1px solid var(--sep); }
 
@@ -183,7 +182,12 @@ main { max-height: 640px; overflow-y: auto; }
 .error { margin: 4px 0 0 20px; color: var(--danger); font-size: 12px; }
 
 /* Empty state (NSBox in the original) */
-.empty { padding: 28px 40px 30px; text-align: center; }
+/* With no lights the list collapses and the message takes the window's middle. */
+main:empty { display: none; }
+.empty {
+  flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center;
+  padding: 28px 40px 30px; text-align: center;
+}
 .empty-icon { width: 64px; height: 50px; color: var(--icon); }
 .empty h2 { margin: 12px 0 6px; font-size: 13px; font-weight: 600; }
 .empty p { margin: 0 0 16px; color: var(--text-2); font-size: 12px; }

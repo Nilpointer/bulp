@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"elg/internal/ui"
+	"bulp/internal/ui"
 )
 
 // panel shows the control panel and owns the main loop.
@@ -66,7 +66,7 @@ func (p *browserPanel) show() {
 	url := p.url
 	for _, b := range appBrowsers {
 		if path, err := exec.LookPath(b); err == nil {
-			cmd := exec.Command(path, "--app="+url, "--window-size=389,560", "--class=elg-menubar")
+			cmd := exec.Command(path, "--app="+url, "--window-size=389,560", "--class=bulp-menubar")
 			if err := cmd.Start(); err == nil {
 				go cmd.Wait()
 				return

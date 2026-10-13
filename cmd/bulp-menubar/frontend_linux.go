@@ -10,8 +10,8 @@ import (
 	"fyne.io/systray"
 	"github.com/godbus/dbus/v5"
 
-	"elg/internal/tray"
-	"elg/internal/ui"
+	"bulp/internal/tray"
+	"bulp/internal/ui"
 )
 
 // Linux: a StatusNotifierItem tray icon (D-Bus, no cgo). Tray menus can't hold
@@ -50,8 +50,8 @@ func (f *frontend) run(ctx context.Context, url string) {
 	if !f.windowOnly {
 		start, end := systray.RunWithExternalLoop(func() {
 			systray.SetIcon(tray.IconOff)
-			systray.SetTitle("Elgato Lights")
-			systray.SetTooltip("Elgato Lights")
+			systray.SetTitle("Bulp")
+			systray.SetTooltip("Bulp")
 			systray.SetOnTapped(f.openPanel) // left click
 			f.buildMenu(nil)
 			go f.poll(ctx)

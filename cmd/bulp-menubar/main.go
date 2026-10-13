@@ -1,4 +1,4 @@
-// Command elg-menubar is a menu-bar (macOS) / system-tray (Linux) app for Elgato lights.
+// Command bulp-menubar is a system-tray app for Elgato lights (Linux).
 package main
 
 import (
@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"elg/internal/ui"
+	"bulp/internal/ui"
 )
 
 func main() {
