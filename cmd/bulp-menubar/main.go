@@ -1,4 +1,7 @@
-// Command bulp-menubar is a system-tray app for Elgato lights (Linux).
+//go:build linux
+
+// Command bulp-menubar is a system-tray app for Elgato lights. It's Linux-only:
+// on macOS and Windows, Elgato's own Control Center app covers this.
 package main
 
 import (

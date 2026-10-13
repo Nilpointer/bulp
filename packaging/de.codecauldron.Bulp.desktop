@@ -9,4 +9,5 @@ Terminal=false
 Categories=Utility;
 Keywords=Elgato;Key Light;Ring Light;Light Strip;brightness;color temperature;
 StartupNotify=true
+StartupWMClass=bulp-menubar
 SingleMainWindow=true

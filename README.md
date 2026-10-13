@@ -81,6 +81,7 @@ mise run test
 mise run flatpak       # build + install the Flatpak locally, then: flatpak run de.codecauldron.Bulp
 mise run flatpak-bundle  # single-file build/de.codecauldron.Bulp.flatpak
 mise run appimage      # build/Bulp-<version>-x86_64.AppImage (needs podman or docker)
+mise run release       # all of the above release files + CLI binaries + SHA256SUMS in build/release/
 ```
 
 ### Layout

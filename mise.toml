@@ -39,3 +39,7 @@ run = "packaging/appimage/build.sh"
 description = "Single-file build/de.codecauldron.Bulp.flatpak for releases (pulls the runtime from Flathub on install)"
 depends = ["flatpak"]
 run = "flatpak build-bundle --runtime-repo=https://dl.flathub.org/repo/flathub.flatpakrepo build/flatpak-repo build/de.codecauldron.Bulp.flatpak de.codecauldron.Bulp"
+
+[tasks.release]
+description = "Build all release files into build/release/ (Flatpak bundle, AppImage, CLI binaries, SHA256SUMS)"
+run = "packaging/release.sh"
