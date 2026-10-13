@@ -1,0 +1,97 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Elgato Lights</title>
+<meta name="color-scheme" content="light dark">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <button id="all-power" class="icon" title="Turn all lights on/off"><svg><use href="#i-power"/></svg></button>
+  <button id="rescan" class="icon" title="Search for lights"><svg><use href="#i-rescan"/></svg></button>
+  <div class="logo">Control Center</div>
+  <div class="menu-wrap">
+    <button id="menu-btn" class="icon" title="Settings"><svg><use href="#i-gear"/></svg></button>
+    <div id="menu" class="menu" hidden>
+      <button data-action="rescan">Search for Lights</button>
+      <hr>
+      <button data-action="quit">Quit</button>
+    </div>
+  </div>
+</header>
+
+<main id="list"></main>
+
+<div id="empty" class="empty">
+  <svg class="empty-icon"><use href="#i-wifi-3"/></svg>
+  <h2 id="empty-title">Searching…</h2>
+  <p>Make sure your light is powered on and connected to the same network as this Mac.</p>
+  <button id="empty-rescan" class="push">Search Again</button>
+</div>
+
+<div id="toast" class="toast" hidden></div>
+
+<template id="light-tpl">
+  <section class="light">
+    <div class="title">
+      <button class="icon power" title="Turn on/off"><svg><use href="#i-power"/></svg></button>
+      <span class="name"></span>
+      <svg class="wifi" hidden><use href="#i-wifi-3"/></svg>
+      <span class="spacer"></span>
+      <button class="icon settings" title="Accessory details"><svg><use href="#i-sliders"/></svg></button>
+    </div>
+    <div class="row temp">
+      <button class="icon step" data-step="-25" title="Cooler"><svg><use href="#i-cool"/></svg></button>
+      <input type="range" class="slider temp-slider" min="143" max="344" step="1" aria-label="Color temperature">
+      <button class="icon step" data-step="25" title="Warmer"><svg><use href="#i-warm"/></svg></button>
+    </div>
+    <div class="row hue" hidden>
+      <span class="icon-spacer"></span>
+      <input type="range" class="slider hue-slider" min="0" max="360" step="1" aria-label="Hue">
+      <span class="icon-spacer"></span>
+    </div>
+    <div class="row sat" hidden>
+      <span class="icon-spacer"></span>
+      <input type="range" class="slider sat-slider" min="0" max="100" step="1" aria-label="Saturation">
+      <span class="icon-spacer"></span>
+    </div>
+    <div class="row bright">
+      <button class="icon step" data-step="-10" title="Decrease brightness"><svg><use href="#i-sun-min"/></svg></button>
+      <input type="range" class="slider bright-slider" min="3" max="100" step="1" aria-label="Brightness">
+      <button class="icon step" data-step="10" title="Increase brightness"><svg><use href="#i-sun-max"/></svg></button>
+    </div>
+    <div class="details" hidden>
+      <dl>
+        <dt>Device</dt><dd class="d-product"></dd>
+        <dt>Firmware</dt><dd class="d-firmware"></dd>
+        <dt>Serial Number</dt><dd class="d-serial"></dd>
+        <dt>IP Address</dt><dd class="d-host"></dd>
+        <dt>Wi-Fi</dt><dd class="d-wifi"></dd>
+      </dl>
+      <button class="push identify">Identify</button>
+    </div>
+    <div class="error" hidden></div>
+  </section>
+</template>
+
+<div id="bubble" class="bubble" hidden></div>
+
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="i-power" viewBox="0 0 20 20"><path d="M10 2.5v7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/><path d="M6.2 5.2a6 6 0 1 0 7.6 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/></symbol>
+  <symbol id="i-rescan" viewBox="0 0 20 20"><path d="M15.5 8A6 6 0 0 0 4.6 6.5M4.5 12a6 6 0 0 0 10.9 1.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none"/><path d="M4 3v4h4M16 17v-4h-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/></symbol>
+  <symbol id="i-gear" viewBox="0 0 20 20"><path d="M10 6.8a3.2 3.2 0 1 0 0 6.4 3.2 3.2 0 0 0 0-6.4Z" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M8.6 2.5h2.8l.4 2 1.4.8 1.9-.7 1.4 2.4-1.5 1.3v1.6l1.5 1.3-1.4 2.4-1.9-.7-1.4.8-.4 2H8.6l-.4-2-1.4-.8-1.9.7-1.4-2.4L5 10.7V9.3L3.5 8l1.4-2.4 1.9.7 1.4-.8Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" fill="none"/></symbol>
+  <symbol id="i-sliders" viewBox="0 0 20 20"><path d="M3 6h8M15 6h2M3 14h2M9 14h8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="13" cy="6" r="2" stroke="currentColor" stroke-width="1.6" fill="none"/><circle cx="7" cy="14" r="2" stroke="currentColor" stroke-width="1.6" fill="none"/></symbol>
+  <symbol id="i-sun-min" viewBox="0 0 20 20"><circle cx="10" cy="10" r="3" fill="currentColor"/><g stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M10 4.5v1M10 14.5v1M4.5 10h1M14.5 10h1M6.1 6.1l.7.7M13.2 13.2l.7.7M6.1 13.9l.7-.7M13.2 6.8l.7-.7"/></g></symbol>
+  <symbol id="i-sun-max" viewBox="0 0 20 20"><circle cx="10" cy="10" r="3.6" fill="currentColor"/><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M10 1.8v2.4M10 15.8v2.4M1.8 10h2.4M15.8 10h2.4M4.2 4.2l1.7 1.7M14.1 14.1l1.7 1.7M4.2 15.8l1.7-1.7M14.1 5.9l1.7-1.7"/></g></symbol>
+  <symbol id="i-cool" viewBox="0 0 20 20"><g stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M10 2.5v15M3.5 6.2l13 7.6M3.5 13.8l13-7.6M8 3.8l2 1.7 2-1.7M8 16.2l2-1.7 2 1.7"/></g></symbol>
+  <symbol id="i-warm" viewBox="0 0 20 20"><path d="M10 2.5c.6 3 4.5 5 4.5 9a4.5 4.5 0 0 1-9 0c0-2 1-3.3 2-4.3.3 1.4 1 2.3 2 2.6C9 7.5 9.2 4.7 10 2.5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" fill="none"/></symbol>
+  <symbol id="i-wifi-1" viewBox="0 0 20 16"><path d="M10 13.5h0" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/><path d="M6.5 10a5 5 0 0 1 7 0M3.5 7a9 9 0 0 1 13 0M1 4a12.5 12.5 0 0 1 18 0" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none" opacity=".25"/></symbol>
+  <symbol id="i-wifi-2" viewBox="0 0 20 16"><path d="M10 13.5h0" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/><path d="M6.5 10a5 5 0 0 1 7 0" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none"/><path d="M3.5 7a9 9 0 0 1 13 0M1 4a12.5 12.5 0 0 1 18 0" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none" opacity=".25"/></symbol>
+  <symbol id="i-wifi-3" viewBox="0 0 20 16"><path d="M10 13.5h0" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/><path d="M6.5 10a5 5 0 0 1 7 0M3.5 7a9 9 0 0 1 13 0" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none"/><path d="M1 4a12.5 12.5 0 0 1 18 0" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none" opacity=".25"/></symbol>
+  <symbol id="i-wifi-4" viewBox="0 0 20 16"><path d="M10 13.5h0" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/><path d="M6.5 10a5 5 0 0 1 7 0M3.5 7a9 9 0 0 1 13 0M1 4a12.5 12.5 0 0 1 18 0" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none"/></symbol>
+</svg>
+
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+[tools]
+go = "1.27"
+
+[tasks.build]
+description = "Build the CLI and the menu-bar app"
+run = [
+  "go build -o bin/elg ./cmd/elg",
+  "go build -o bin/elg-menubar ./cmd/elg-menubar",
+]
+
+[tasks.build-linux]
+description = "Cross-compile static Linux binaries (amd64 + arm64) into bin/linux-*/"
+env = { GOOS = "linux", CGO_ENABLED = "0" }
+run = [
+  "GOARCH=amd64 go build -o bin/linux-amd64/ ./cmd/...",
+  "GOARCH=arm64 go build -o bin/linux-arm64/ ./cmd/...",
+]
+
+[tasks.test]
+run = "go test ./..."
+
+[tasks.menubar]
+description = "Build and run the menu-bar app"
+depends = ["build"]
+run = "./bin/elg-menubar"
