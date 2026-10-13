@@ -12,7 +12,7 @@ import (
 )
 
 // appID names the app to the desktop (Wayland, .desktop file, Flatpak).
-const appID = "de.codecauldron.Bulp"
+const appID = "io.github.Nilpointer.Bulp"
 
 // webviewPanel is a native GTK window with WebKitGTK.
 type webviewPanel struct{}

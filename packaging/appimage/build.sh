@@ -4,7 +4,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 
-id=de.codecauldron.Bulp
+id=io.github.Nilpointer.Bulp
 version=$(grep -om1 'release version="[^"]*"' packaging/$id.metainfo.xml | cut -d'"' -f2)
 out=build/appimage
 appdir=$out/AppDir

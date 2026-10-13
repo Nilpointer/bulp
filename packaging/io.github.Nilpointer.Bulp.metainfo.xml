@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop-application">
-  <id>de.codecauldron.Bulp</id>
+  <id>io.github.Nilpointer.Bulp</id>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>MIT</project_license>
 
   <name>Bulp</name>
   <summary>Control your Elgato lights from the desktop</summary>
-  <developer id="de.codecauldron">
+  <developer id="io.github.nilpointer">
     <name>Andreas Ulrich</name>
   </developer>
 
@@ -24,10 +24,21 @@
     <p>This is an unofficial app, not affiliated with or endorsed by Elgato or Corsair.</p>
   </description>
 
-  <launchable type="desktop-id">de.codecauldron.Bulp.desktop</launchable>
-  <url type="homepage">https://github.com/Nilpointer/bulps</url>
-  <url type="bugtracker">https://github.com/Nilpointer/bulps/issues</url>
-  <url type="vcs-browser">https://github.com/Nilpointer/bulps</url>
+  <launchable type="desktop-id">io.github.Nilpointer.Bulp.desktop</launchable>
+  <url type="homepage">https://github.com/Nilpointer/bulp</url>
+  <url type="bugtracker">https://github.com/Nilpointer/bulp/issues</url>
+  <url type="vcs-browser">https://github.com/Nilpointer/bulp</url>
+
+  <screenshots>
+    <screenshot type="default">
+      <caption>Control panel with brightness, color temperature and color for each light</caption>
+      <image type="source" width="389" height="520">https://raw.githubusercontent.com/Nilpointer/bulp/41d80e622378f3475ff45ef66f3113ecb0ddd660/docs/screenshots/panel-light.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>The control panel in dark mode</caption>
+      <image type="source" width="389" height="520">https://raw.githubusercontent.com/Nilpointer/bulp/41d80e622378f3475ff45ef66f3113ecb0ddd660/docs/screenshots/panel-dark.png</image>
+    </screenshot>
+  </screenshots>
 
   <content_rating type="oars-1.1"/>
   <supports>
@@ -44,6 +55,11 @@
   </branding>
 
   <releases>
+    <release version="1.2.0" date="2026-10-13">
+      <description>
+        <p>New app ID io.github.Nilpointer.Bulp, in preparation for Flathub. A Flatpak installed under the old ID must be uninstalled and installed again.</p>
+      </description>
+    </release>
     <release version="1.1.0" date="2026-10-13">
       <description>
         <p>Better for scripts and AI agents:</p>

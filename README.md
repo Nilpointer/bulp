@@ -19,11 +19,11 @@ Elgato's official Control Center app (the `bulp` CLI works there too).
 
 ## Install
 
-Downloads are on the [releases page](https://github.com/Nilpointer/bulps/releases):
+Downloads are on the [releases page](https://github.com/Nilpointer/bulp/releases):
 
 | Download | |
 |---|---|
-| **Flatpak** `de.codecauldron.Bulp.flatpak` | `flatpak install --user de.codecauldron.Bulp.flatpak`, then start Bulp from your app launcher. Pulls the GNOME runtime from Flathub. Includes the CLI: `flatpak run --command=bulp de.codecauldron.Bulp`. |
+| **Flatpak** `io.github.Nilpointer.Bulp.flatpak` | `flatpak install --user io.github.Nilpointer.Bulp.flatpak`, then start Bulp from your app launcher. Pulls the GNOME runtime from Flathub. Includes the CLI: `flatpak run --command=bulp io.github.Nilpointer.Bulp`. |
 | **AppImage** `Bulp-<version>-x86_64.AppImage` | `chmod +x` and run. Shows the panel in a native window if GTK 4 + WebKitGTK 6.0 are installed (Ubuntu 24.04+, Debian 12+, current Fedora/Arch), otherwise in your browser. |
 | **CLI** `bulp-<os>-<arch>` | Single static binary for Linux, macOS and Windows (amd64/arm64); see [Linux](#cli-on-linux), [macOS](#cli-on-macos) and [Windows](#cli-on-windows) below. |
 
@@ -47,7 +47,7 @@ Put the `bulp` binary into a directory that's already on your `PATH`, so your sh
 find it without any `PATH` changes. Download it first (on ARM machines use `bulp-linux-arm64`):
 
 ```sh
-curl -fLo /tmp/bulp https://github.com/Nilpointer/bulps/releases/latest/download/bulp-linux-amd64
+curl -fLo /tmp/bulp https://github.com/Nilpointer/bulp/releases/latest/download/bulp-linux-amd64
 ```
 
 - **For all users: `/usr/local/bin`.** It's on the default `PATH` of every distribution and meant for
@@ -68,7 +68,7 @@ available as `bulp` with a small wrapper instead:
 
 ```sh
 mkdir -p ~/.local/bin
-printf '#!/bin/sh\nexec flatpak run --command=bulp de.codecauldron.Bulp "$@"\n' > ~/.local/bin/bulp
+printf '#!/bin/sh\nexec flatpak run --command=bulp io.github.Nilpointer.Bulp "$@"\n' > ~/.local/bin/bulp
 chmod +x ~/.local/bin/bulp
 ```
 
@@ -82,7 +82,7 @@ agents find it:
 
 ```sh
 # Apple Silicon; on an Intel Mac use bulp-darwin-amd64
-curl -fLo /tmp/bulp https://github.com/Nilpointer/bulps/releases/latest/download/bulp-darwin-arm64
+curl -fLo /tmp/bulp https://github.com/Nilpointer/bulp/releases/latest/download/bulp-darwin-arm64
 sudo install -d /usr/local/bin                    # newer Macs may not have the folder yet
 sudo install -m 755 /tmp/bulp /usr/local/bin/bulp
 bulp list
@@ -107,7 +107,7 @@ In PowerShell, install it into your user's programs folder and add that to your 
 # x64 PCs; on Windows on Arm use bulp-windows-arm64.exe
 $dir = "$env:LOCALAPPDATA\Programs\bulp"
 New-Item -ItemType Directory -Force $dir | Out-Null
-Invoke-WebRequest https://github.com/Nilpointer/bulps/releases/latest/download/bulp-windows-amd64.exe -OutFile "$dir\bulp.exe"
+Invoke-WebRequest https://github.com/Nilpointer/bulp/releases/latest/download/bulp-windows-amd64.exe -OutFile "$dir\bulp.exe"
 Unblock-File "$dir\bulp.exe"
 [Environment]::SetEnvironmentVariable("Path", [Environment]::GetEnvironmentVariable("Path", "User") + ";$dir", "User")
 ```
@@ -199,13 +199,13 @@ your `PATH`).
 **Install**, either inside Claude Code or from a terminal:
 
 ```text
-/plugin install bulp --marketplace Nilpointer/bulps
+/plugin install bulp --marketplace Nilpointer/bulp
 ```
 ```sh
-claude plugin install bulp --marketplace Nilpointer/bulps
+claude plugin install bulp --marketplace Nilpointer/bulp
 ```
 
-On Claude Code before 2.1.275, add the marketplace first: `claude plugin marketplace add Nilpointer/bulps`,
+On Claude Code before 2.1.275, add the marketplace first: `claude plugin marketplace add Nilpointer/bulp`,
 then `claude plugin install bulp@bulps`. The plugin is installed for your user in all projects. With
 `--scope project` it's recorded in the project's `.claude/settings.json` instead, so everyone working on
 that repository gets it.
@@ -236,7 +236,7 @@ Claude Code, copy the folder into the agent's skills directory:
 ```sh
 mkdir -p ~/.claude/skills && cp -r skills/bulp ~/.claude/skills/
 # or without a clone of this repo:
-mkdir -p ~/.claude/skills/bulp && curl -fLo ~/.claude/skills/bulp/SKILL.md https://raw.githubusercontent.com/Nilpointer/bulps/main/skills/bulp/SKILL.md
+mkdir -p ~/.claude/skills/bulp && curl -fLo ~/.claude/skills/bulp/SKILL.md https://raw.githubusercontent.com/Nilpointer/bulp/main/skills/bulp/SKILL.md
 ```
 
 ### Automating lights out
@@ -280,8 +280,8 @@ development packages: `sudo dnf install gtk4-devel webkitgtk6.0-devel`
 mise run build         # bin/bulp, bin/bulp-menubar
 mise run build-linux   # static binaries in bin/linux-{amd64,arm64}/ (no cgo: the panel opens in a browser)
 mise run test
-mise run flatpak       # build + install the Flatpak locally, then: flatpak run de.codecauldron.Bulp
-mise run flatpak-bundle  # single-file build/de.codecauldron.Bulp.flatpak
+mise run flatpak       # build + install the Flatpak locally, then: flatpak run io.github.Nilpointer.Bulp
+mise run flatpak-bundle  # single-file build/io.github.Nilpointer.Bulp.flatpak
 mise run appimage      # build/Bulp-<version>-x86_64.AppImage (needs podman or docker)
 mise run release       # all of the above release files + CLI binaries + SHA256SUMS in build/release/
 ```
@@ -296,7 +296,7 @@ mise run release       # all of the above release files + CLI binaries + SHA256S
 
 ### Packaging notes
 
-The Flatpak (`packaging/flatpak/de.codecauldron.Bulp.yml`) uses the GNOME 51 runtime, which ships GTK 4 and
+The Flatpak (`packaging/flatpak/io.github.Nilpointer.Bulp.yml`) uses the GNOME 51 runtime, which ships GTK 4 and
 WebKitGTK; one-time setup: `flatpak install flathub org.flatpak.Builder`.
 
 The AppImage doesn't bundle GTK or WebKit (~17 MB). It carries two builds of `bulp-menubar`: one linked

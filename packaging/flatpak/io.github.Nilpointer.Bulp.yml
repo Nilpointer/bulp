@@ -1,5 +1,5 @@
 # Local build: mise run flatpak (vendors Go modules first; the build has no network).
-id: de.codecauldron.Bulp
+id: io.github.Nilpointer.Bulp
 runtime: org.gnome.Platform
 runtime-version: '51' # ships GTK 4 and WebKitGTK 6.0
 sdk: org.gnome.Sdk
@@ -25,10 +25,10 @@ modules:
     buildsystem: simple
     build-commands:
       - go build -o /app/bin/bulp-menubar ./cmd/bulp-menubar
-      - go build -o /app/bin/bulp ./cmd/bulp # flatpak run --command=bulp de.codecauldron.Bulp
-      - install -Dm644 packaging/de.codecauldron.Bulp.desktop -t /app/share/applications
-      - install -Dm644 packaging/de.codecauldron.Bulp.metainfo.xml -t /app/share/metainfo
-      - install -Dm644 packaging/de.codecauldron.Bulp.svg -t /app/share/icons/hicolor/scalable/apps
+      - go build -o /app/bin/bulp ./cmd/bulp # flatpak run --command=bulp io.github.Nilpointer.Bulp
+      - install -Dm644 packaging/io.github.Nilpointer.Bulp.desktop -t /app/share/applications
+      - install -Dm644 packaging/io.github.Nilpointer.Bulp.metainfo.xml -t /app/share/metainfo
+      - install -Dm644 packaging/io.github.Nilpointer.Bulp.svg -t /app/share/icons/hicolor/scalable/apps
     sources:
       - type: dir
         path: ../..

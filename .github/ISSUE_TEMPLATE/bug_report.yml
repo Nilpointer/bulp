@@ -59,6 +59,6 @@ body:
     attributes:
       label: Terminal output
       description: >
-        Start Bulp from a terminal (`flatpak run de.codecauldron.Bulp`, or run the AppImage) and paste what
+        Start Bulp from a terminal (`flatpak run io.github.Nilpointer.Bulp`, or run the AppImage) and paste what
         it prints. Please remove serial numbers or anything else you'd rather not share.
       render: text

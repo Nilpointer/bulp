@@ -25,10 +25,10 @@ depends = ["build"]
 run = "./bin/bulp-menubar"
 
 [tasks.flatpak]
-description = "Build and install the Flatpak locally (flatpak run de.codecauldron.Bulp)"
+description = "Build and install the Flatpak locally (flatpak run io.github.Nilpointer.Bulp)"
 run = [
   "go mod vendor", # the build has no network; removed again so local builds don't use it
-  "flatpak run org.flatpak.Builder --user --install --force-clean --install-deps-from=flathub --repo=build/flatpak-repo build/flatpak packaging/flatpak/de.codecauldron.Bulp.yml; s=$?; rm -rf vendor; exit $s",
+  "flatpak run org.flatpak.Builder --user --install --force-clean --install-deps-from=flathub --repo=build/flatpak-repo build/flatpak packaging/flatpak/io.github.Nilpointer.Bulp.yml; s=$?; rm -rf vendor; exit $s",
 ]
 
 [tasks.appimage]
@@ -36,9 +36,9 @@ description = "Build build/Bulp-<version>-x86_64.AppImage (needs podman or docke
 run = "packaging/appimage/build.sh"
 
 [tasks.flatpak-bundle]
-description = "Single-file build/de.codecauldron.Bulp.flatpak for releases (pulls the runtime from Flathub on install)"
+description = "Single-file build/io.github.Nilpointer.Bulp.flatpak for releases (pulls the runtime from Flathub on install)"
 depends = ["flatpak"]
-run = "flatpak build-bundle --runtime-repo=https://dl.flathub.org/repo/flathub.flatpakrepo build/flatpak-repo build/de.codecauldron.Bulp.flatpak de.codecauldron.Bulp"
+run = "flatpak build-bundle --runtime-repo=https://dl.flathub.org/repo/flathub.flatpakrepo build/flatpak-repo build/io.github.Nilpointer.Bulp.flatpak io.github.Nilpointer.Bulp"
 
 [tasks.release]
 description = "Build all release files into build/release/ (Flatpak bundle, AppImage, CLI binaries, SHA256SUMS)"

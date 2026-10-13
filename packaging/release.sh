@@ -18,7 +18,7 @@ for target in linux/amd64 linux/arm64 darwin/amd64 darwin/arm64 windows/amd64 wi
 	CGO_ENABLED=0 GOOS=$os GOARCH=$arch go build -trimpath -ldflags=-s -o "$out/bulp-$os-$arch$ext" ./cmd/bulp
 done
 
-version=$(grep -om1 'release version="[^"]*"' packaging/de.codecauldron.Bulp.metainfo.xml | cut -d'"' -f2)
-cp "build/Bulp-$version-x86_64.AppImage" build/de.codecauldron.Bulp.flatpak "$out/"
+version=$(grep -om1 'release version="[^"]*"' packaging/io.github.Nilpointer.Bulp.metainfo.xml | cut -d'"' -f2)
+cp "build/Bulp-$version-x86_64.AppImage" build/io.github.Nilpointer.Bulp.flatpak "$out/"
 (cd "$out" && sha256sum -- * >SHA256SUMS)
 ls -lh "$out"

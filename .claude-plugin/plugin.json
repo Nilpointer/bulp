@@ -1,14 +1,14 @@
 {
   "$schema": "https://anthropic.com/claude-code/plugin.schema.json",
   "name": "bulp",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Control Elgato lights (Key Light, Ring Light, Light Strip) from Claude Code with the bulp CLI: on/off, brightness, color temperature and color.",
   "author": {
     "name": "Andreas Ulrich",
     "email": "elg@codecauldron.de"
   },
-  "homepage": "https://github.com/Nilpointer/bulps",
-  "repository": "https://github.com/Nilpointer/bulps",
+  "homepage": "https://github.com/Nilpointer/bulp",
+  "repository": "https://github.com/Nilpointer/bulp",
   "license": "MIT",
   "keywords": ["elgato", "key-light", "lights", "smart-home"]
 }

@@ -1,7 +1,7 @@
 ---
 name: bulp
 description: Control Elgato lights (Key Light, Ring Light, Light Strip, …) on the local network with the bulp CLI - switch them on or off, change brightness, color temperature or color, or check their state. Use when the user asks to turn lights on/off, dim, brighten, warm up, cool down or color their lights, or asks what the lights are set to.
-allowed-tools: Bash(bulp:*), Bash(flatpak run --command=bulp de.codecauldron.Bulp:*)
+allowed-tools: Bash(bulp:*), Bash(flatpak run --command=bulp io.github.Nilpointer.Bulp:*)
 ---
 
 # Controlling Elgato lights with bulp
@@ -9,9 +9,9 @@ allowed-tools: Bash(bulp:*), Bash(flatpak run --command=bulp de.codecauldron.Bul
 ## Find the command
 
 Run `bulp` directly; don't probe for it first (users often allow only `bulp` commands). Only if the
-shell reports `command not found`, use `flatpak run --command=bulp de.codecauldron.Bulp` in its place
+shell reports `command not found`, use `flatpak run --command=bulp io.github.Nilpointer.Bulp` in its place
 (Bulp installed as a Flatpak). If that fails too, tell the user to install Bulp
-(https://github.com/Nilpointer/bulps/releases) and stop.
+(https://github.com/Nilpointer/bulp/releases) and stop.
 
 ## Read the state first
 
