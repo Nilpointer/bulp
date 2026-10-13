@@ -28,7 +28,7 @@ run = "./bin/elg-menubar"
 description = "Build and install the Flatpak locally (flatpak run de.codecauldron.Elg)"
 run = [
   "go mod vendor", # the build has no network; removed again so local builds don't use it
-  "flatpak run org.flatpak.Builder --user --install --force-clean --install-deps-from=flathub --repo=build/flatpak-repo build packaging/flatpak/de.codecauldron.Elg.yml; s=$?; rm -rf vendor; exit $s",
+  "flatpak run org.flatpak.Builder --user --install --force-clean --install-deps-from=flathub --repo=build/flatpak-repo build/flatpak packaging/flatpak/de.codecauldron.Elg.yml; s=$?; rm -rf vendor; exit $s",
 ]
 
 [tasks.appimage]
