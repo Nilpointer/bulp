@@ -3,23 +3,24 @@ package main
 import (
 	"context"
 	"log"
-	"os/exec"
 	"slices"
-	"strings"
 	"sync"
 	"time"
 
 	"fyne.io/systray"
+	"github.com/godbus/dbus/v5"
 
 	"elg/internal/tray"
 	"elg/internal/ui"
 )
 
 // Linux: a StatusNotifierItem tray icon (D-Bus, no cgo). Tray menus can't hold
-// sliders, so the full control panel opens in a small app-style browser window.
+// sliders, so the full control panel opens in its own window (see panel).
+// Without a tray host (stock GNOME) the app is just that window.
 type frontend struct {
-	srv *ui.Server
-	url string
+	srv        *ui.Server
+	panel      panel
+	windowOnly bool
 
 	mu      sync.Mutex
 	ids     []string                     // light IDs the menu was last built for
@@ -28,21 +29,56 @@ type frontend struct {
 }
 
 func newFrontend(srv *ui.Server) *frontend {
-	return &frontend{srv: srv, items: map[string]*systray.MenuItem{}}
+	f := &frontend{srv: srv, items: map[string]*systray.MenuItem{}}
+	// With a tray icon, closing the panel just hides it.
+	f.panel = newPanel(srv, func() {
+		if f.windowOnly {
+			f.quit()
+		}
+	})
+	if !trayAvailable() {
+		log.Print("no system tray found (on GNOME, install the AppIndicator extension: " +
+			"https://extensions.gnome.org/extension/615/appindicator-support/); showing just the control panel")
+		f.windowOnly = true
+	}
+	return f
 }
 
-func (f *frontend) quit() { systray.Quit() }
+func (f *frontend) quit() { f.panel.quit() }
 
 func (f *frontend) run(ctx context.Context, url string) {
-	f.url = url
-	systray.Run(func() {
-		systray.SetIcon(tray.IconOff)
-		systray.SetTitle("Elgato Lights")
-		systray.SetTooltip("Elgato Lights")
-		systray.SetOnTapped(f.openPanel) // left click
-		f.buildMenu(nil)
-		go f.poll(ctx)
-	}, nil)
+	if !f.windowOnly {
+		start, end := systray.RunWithExternalLoop(func() {
+			systray.SetIcon(tray.IconOff)
+			systray.SetTitle("Elgato Lights")
+			systray.SetTooltip("Elgato Lights")
+			systray.SetOnTapped(f.openPanel) // left click
+			f.buildMenu(nil)
+			go f.poll(ctx)
+		}, nil)
+		start()
+		defer end()
+	}
+	f.panel.run(ctx, url, f.windowOnly)
+}
+
+func (f *frontend) openPanel() { f.panel.show() }
+
+// trayAvailable reports whether a StatusNotifierWatcher (the tray host) is
+// running or can be started on the session bus.
+func trayAvailable() bool {
+	conn, err := dbus.SessionBus()
+	if err != nil {
+		return false
+	}
+	const watcher = "org.kde.StatusNotifierWatcher"
+	var running bool
+	if conn.BusObject().Call("org.freedesktop.DBus.NameHasOwner", 0, watcher).Store(&running) == nil && running {
+		return true
+	}
+	var activatable []string
+	conn.BusObject().Call("org.freedesktop.DBus.ListActivatableNames", 0).Store(&activatable)
+	return slices.Contains(activatable, watcher)
 }
 
 // poll keeps the tray icon and menu in sync with the lights.
@@ -58,6 +94,9 @@ func (f *frontend) poll(ctx context.Context) {
 }
 
 func (f *frontend) lightsChanged(lights []ui.Light) {
+	if f.windowOnly {
+		return
+	}
 	if ui.AnyOn(lights) {
 		systray.SetIcon(tray.IconOn)
 	} else {
@@ -130,7 +169,7 @@ func (f *frontend) buildMenu(lights []ui.Light) {
 
 	systray.AddSeparator()
 	quit := systray.AddMenuItem("Quit", "")
-	go f.onClick(gen, quit, systray.Quit)
+	go f.onClick(gen, quit, f.quit)
 }
 
 func (f *frontend) onClick(gen chan struct{}, it *systray.MenuItem, fn func()) {
@@ -142,29 +181,4 @@ func (f *frontend) onClick(gen chan struct{}, it *systray.MenuItem, fn func()) {
 			fn()
 		}
 	}
-}
-
-// Chromium-based browsers can open a URL as a chromeless "app" window.
-var appBrowsers = []string{
-	"chromium", "chromium-browser", "google-chrome", "google-chrome-stable",
-	"brave-browser", "brave", "microsoft-edge", "microsoft-edge-stable", "vivaldi",
-}
-
-func (f *frontend) openPanel() {
-	for _, b := range appBrowsers {
-		if path, err := exec.LookPath(b); err == nil {
-			cmd := exec.Command(path, "--app="+f.url, "--window-size=389,560", "--class=elg-menubar")
-			if err := cmd.Start(); err == nil {
-				go cmd.Wait()
-				return
-			}
-		}
-	}
-	// Fallback: whatever the desktop's default browser is.
-	cmd := exec.Command("xdg-open", f.url)
-	if err := cmd.Start(); err != nil {
-		log.Printf("can't open control panel (%v); open %s in a browser", err, strings.TrimSpace(f.url))
-		return
-	}
-	go cmd.Wait()
 }

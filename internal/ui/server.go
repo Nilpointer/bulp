@@ -17,6 +17,7 @@ import (
 	"slices"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"elg/elgato"
@@ -49,6 +50,11 @@ type Server struct {
 	OnChange func(lights []Light)
 	// Quit is called when the UI asks the app to exit.
 	Quit func()
+	// Closed is called when a standalone UI page goes away (window closed,
+	// or just reloading: check LastRequest a moment later to tell them apart).
+	Closed func()
+
+	lastReq atomic.Int64 // unix nanos of the latest HTTP request
 
 	fixedHosts []string
 	discover   time.Duration
@@ -93,9 +99,18 @@ func (s *Server) Start(ctx context.Context) (string, error) {
 			go s.Quit()
 		}
 	})
+	mux.HandleFunc("POST /api/closed", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusNoContent)
+		if s.Closed != nil {
+			go s.Closed()
+		}
+	})
 
 	srv := &http.Server{
-		Handler: http.StripPrefix(prefix, mux),
+		Handler: http.StripPrefix(prefix, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			s.lastReq.Store(time.Now().UnixNano())
+			mux.ServeHTTP(w, r)
+		})),
 		BaseContext: func(net.Listener) context.Context {
 			return ctx
 		},
@@ -104,6 +119,9 @@ func (s *Server) Start(ctx context.Context) (string, error) {
 	go s.discoverLoop(ctx)
 	return "http://" + ln.Addr().String() + prefix + "/", nil
 }
+
+// LastRequest reports when the UI last talked to the server.
+func (s *Server) LastRequest() time.Time { return time.Unix(0, s.lastReq.Load()) }
 
 func (s *Server) discoverLoop(ctx context.Context) {
 	if len(s.fixedHosts) > 0 {

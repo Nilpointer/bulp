@@ -257,4 +257,6 @@ if (inPopover) {
   const sync = () => (document.hidden ? window.onPopoverHide() : window.onPopoverShow());
   document.addEventListener('visibilitychange', sync);
   sync();
+  // Lets the app exit with its window when there's no tray icon to keep it around.
+  window.addEventListener('pagehide', () => navigator.sendBeacon('api/closed'));
 }
