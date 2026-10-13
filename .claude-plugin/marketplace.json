@@ -1,0 +1,15 @@
+{
+  "name": "bulps",
+  "description": "Bulp: control Elgato lights from Claude Code.",
+  "owner": {
+    "name": "Andreas Ulrich",
+    "email": "elg@codecauldron.de"
+  },
+  "plugins": [
+    {
+      "name": "bulp",
+      "source": "./",
+      "description": "Control Elgato lights from Claude Code with the bulp CLI."
+    }
+  ]
+}

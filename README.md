@@ -135,8 +135,8 @@ $ bulp -json status
   then don't browse the network first, and always hit the same lights.
 - **Pick lights by name:** `-name desk` acts only on lights whose name contains "desk", with or without
   `BULP_HOST`.
-- **Allow it without prompts:** in Claude Code, add `"Bash(bulp:*)"` to `permissions.allow` in
-  `.claude/settings.json` (or `~/.claude/settings.json`).
+- **Allow it without prompts:** the skill below does this for you while it's active. Without the skill,
+  add `"Bash(bulp:*)"` to `permissions.allow` in `.claude/settings.json` (or `~/.claude/settings.json`).
 
 What an agent runs for typical requests (the skill below teaches it the same mappings):
 
@@ -154,16 +154,27 @@ What an agent runs for typical requests (the skill below teaches it the same map
 
 **Agent skill:** [`skills/bulp/SKILL.md`](skills/bulp/SKILL.md) teaches an agent when and how to use
 `bulp` (finding the command, reading the state first, mapping "a bit warmer" to a command, handling
-unreachable lights), so it works from any directory. Install it for Claude Code with
+unreachable lights), so it works from any directory.
+
+**Claude Code plugin (recommended):** this repo is also a plugin marketplace. In Claude Code, run
+
+```text
+/plugin install bulp --marketplace Nilpointer/bulps
+```
+
+(on versions before 2.1.275: `/plugin marketplace add Nilpointer/bulps`, then `/plugin install bulp@bulps`),
+then just ask "dim the lights to 40%". The skill runs `bulp` without permission prompts, and
+`/plugin update bulp` picks up new versions of it. You still need the `bulp` command itself (see
+[Install](#install)).
+
+**Skill only:** for other agents that support the Agent Skills `SKILL.md` format, or to manage it by hand
+in Claude Code, copy the folder into the agent's skills directory:
 
 ```sh
 mkdir -p ~/.claude/skills && cp -r skills/bulp ~/.claude/skills/
 # or without a clone of this repo:
 mkdir -p ~/.claude/skills/bulp && curl -fLo ~/.claude/skills/bulp/SKILL.md https://raw.githubusercontent.com/Nilpointer/bulps/main/skills/bulp/SKILL.md
 ```
-
-then just ask "dim the lights to 40%". Other agents that support the Agent Skills `SKILL.md` format load
-the same folder from their own skills directory.
 
 ### Automating lights out
 

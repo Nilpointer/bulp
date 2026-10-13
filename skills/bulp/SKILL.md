@@ -1,6 +1,7 @@
 ---
 name: bulp
 description: Control Elgato lights (Key Light, Ring Light, Light Strip, …) on the local network with the bulp CLI - switch them on or off, change brightness, color temperature or color, or check their state. Use when the user asks to turn lights on/off, dim, brighten, warm up, cool down or color their lights, or asks what the lights are set to.
+allowed-tools: Bash(bulp:*), Bash(flatpak run --command=bulp de.codecauldron.Bulp:*)
 ---
 
 # Controlling Elgato lights with bulp
